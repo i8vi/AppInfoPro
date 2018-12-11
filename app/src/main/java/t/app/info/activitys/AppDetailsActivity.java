@@ -32,6 +32,7 @@ import dev.utils.app.PermissionUtils;
 import dev.utils.app.assist.manager.ActivityManager;
 import dev.utils.app.info.AppInfoBean;
 import dev.utils.app.info.AppInfoItem;
+import dev.utils.app.info.AppInfoUtils;
 import dev.utils.app.info.KeyValueBean;
 import dev.utils.app.logger.DevLogger;
 import dev.utils.app.toast.ToastUtils;
@@ -142,7 +143,7 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
     private void initOperate(){
         try {
             // 解析获取数据
-            appInfoItem = AppInfoItem.obtain(getIntent().getStringExtra(KeyConstants.KEY_PACKNAME));
+            appInfoItem = AppInfoUtils.getAppInfoItem(getIntent().getStringExtra(KeyConstants.KEY_PACKNAME));
         } catch (Exception e){
             DevLogger.eTag(TAG, e, "initOperate");
         }

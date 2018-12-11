@@ -40,5 +40,7 @@ dependencies {
     // 加载动画效果
     implementation 'com.tt:whorlviewlibrary:1.0.3'
     // DevUtils
-    implementation 'com.github.afkT:DevUtils:1.0.9@aar'
+    implementation 'com.github.afkT:DevUtils:1.1.8@aar'
+    // EventBus 事件订阅/分发
+    implementation 'org.greenrobot:eventbus:3.1.1'
 }

@@ -7,6 +7,7 @@ import java.util.Comparator;
 
 import dev.utils.app.SDCardUtils;
 import dev.utils.app.info.AppInfoBean;
+import dev.utils.app.info.AppInfoUtils;
 import dev.utils.app.logger.DevLogger;
 import dev.utils.common.DevCommonUtils;
 import dev.utils.common.FileUtils;
@@ -225,7 +226,7 @@ public final class QuerySDCardUtils {
                 // 判断是否符合结尾
                 if (DevCommonUtils.isEndsWith(true, fName, filterSuffixs)){
                     // 获取App信息
-                    AppInfoBean appInfoBean = AppInfoBean.obtainUri(fPath);
+                    AppInfoBean appInfoBean = AppInfoUtils.getAppInfoBeanToPath(fPath);
                     if (appInfoBean != null){
                         // 初始化实体类
                         return new FileResItem(appInfoBean, file, fName, fPath, FileUtils.getFileMD5ToString(file));

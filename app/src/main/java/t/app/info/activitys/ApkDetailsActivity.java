@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,13 +25,13 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dev.utils.app.AppCommonUtils;
 import dev.utils.app.AppUtils;
 import dev.utils.app.ClipboardUtils;
 import dev.utils.app.PermissionUtils;
 import dev.utils.app.assist.manager.ActivityManager;
 import dev.utils.app.info.ApkInfoItem;
 import dev.utils.app.info.AppInfoBean;
+import dev.utils.app.info.AppInfoUtils;
 import dev.utils.app.info.KeyValueBean;
 import dev.utils.app.logger.DevLogger;
 import dev.utils.app.toast.ToastUtils;
@@ -103,18 +104,18 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
         switch (v.getId()){
             case R.id.apd_install_apk_tv: // 安装应用
                 // 文件存在处理
-                if (FileUtils.isFileExists(apkInfoItem.getApkUri())){
+                if (FileUtils.isFileExists(apkInfoItem.getAppInfoBean().getSourceDir())){
                     // Android 8.0以上
-                    if (AppCommonUtils.isO()){
+                    if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O){
                         if (getPackageManager().canRequestPackageInstalls()){
                             // 安装apk
-                            AppUtils.installApp(apkInfoItem.getApkUri(), "t.app.info.fileprovider");
+                            AppUtils.installApp(apkInfoItem.getAppInfoBean().getSourceDir(), "t.app.info.fileprovider");
                         } else {
                             PermissionUtils.permission(Manifest.permission.REQUEST_INSTALL_PACKAGES).callBack(new PermissionUtils.PermissionCallBack() {
                                 @Override
                                 public void onGranted(PermissionUtils permissionUtils) {
                                     // 安装apk
-                                    AppUtils.installApp(apkInfoItem.getApkUri(), "t.app.info.fileprovider");
+                                    AppUtils.installApp(apkInfoItem.getAppInfoBean().getSourceDir(), "t.app.info.fileprovider");
                                 }
 
                                 @Override
@@ -133,19 +134,19 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
                         return;
                     }
                     // 安装apk
-                    AppUtils.installApp(apkInfoItem.getApkUri(), "t.app.info.fileprovider");
+                    AppUtils.installApp(apkInfoItem.getAppInfoBean().getSourceDir(), "t.app.info.fileprovider");
                 } else {
                     ToastUtils.showShort(this, R.string.file_not_exist);
                 }
                 break;
             case R.id.apd_delete_apk_tv: // 删除apk文件
                 // 文件存在处理
-                if (FileUtils.isFileExists(apkInfoItem.getApkUri())){
+                if (FileUtils.isFileExists(apkInfoItem.getAppInfoBean().getSourceDir())){
                     // 删除文件通知
-                    BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_DELETE_APK_FILE_NOTIFY, apkInfoItem.getApkUri());
+                    BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_DELETE_APK_FILE_NOTIFY, apkInfoItem.getAppInfoBean().getSourceDir());
                 }
                 // 删除文件
-                FileUtils.deleteFile(apkInfoItem.getApkUri());
+                FileUtils.deleteFile(apkInfoItem.getAppInfoBean().getSourceDir());
                 // 提示删除成功
                 ToastUtils.showShort(mContext, R.string.delete_suc);
                 break;
@@ -158,7 +159,7 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
     private void initOperate(){
         try {
             // 解析获取数据
-            apkInfoItem = ApkInfoItem.obtain(getIntent().getStringExtra(KeyConstants.KEY_APK_URI));
+            apkInfoItem = AppInfoUtils.getApkInfoItem(getIntent().getStringExtra(KeyConstants.KEY_APK_URI));
         } catch (Exception e){
             DevLogger.eTag(TAG, e, "initOperate");
         }

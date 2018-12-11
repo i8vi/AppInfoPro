@@ -14,6 +14,7 @@ import java.util.List;
 
 import dev.DevUtils;
 import dev.utils.app.info.AppInfoBean;
+import dev.utils.app.info.AppInfoUtils;
 import dev.utils.app.logger.DevLogger;
 import dev.utils.app.share.IPreference;
 import dev.utils.app.share.SharedUtils;
@@ -113,11 +114,11 @@ public final class ProUtils {
             switch (appType){
                 case USER:
                     // 添加符合条件的 App 应用信息
-                    listUserApps.add(new AppInfoBean(pInfo, pManager));
+                    listUserApps.add(AppInfoUtils.getAppInfoBean(pInfo.packageName));
                     break;
                 case SYSTEM:
                     // 添加符合条件的 App 应用信息
-                    listSystemApps.add(new AppInfoBean(pInfo, pManager));
+                    listSystemApps.add(AppInfoUtils.getAppInfoBean(pInfo.packageName));
                     break;
             }
         }
