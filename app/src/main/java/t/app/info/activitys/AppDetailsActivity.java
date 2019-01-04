@@ -94,7 +94,7 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
         super.onResume();
         try {
             // 判断是否安装 app
-            if (!AppUtils.isInstalledApp(mContext, appInfoItem.getAppInfoBean().getAppPackName())){
+            if (!AppUtils.isInstalledApp(appInfoItem.getAppInfoBean().getAppPackName())){
                 // 进行通知
                 BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.FOR_R_APP_UNINSTALL, appInfoItem.getAppInfoBean().getAppPackName());
                 // -
