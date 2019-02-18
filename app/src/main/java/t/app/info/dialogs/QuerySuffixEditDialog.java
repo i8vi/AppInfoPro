@@ -61,8 +61,6 @@ public class QuerySuffixEditDialog extends Dialog implements View.OnClickListene
             int[] screen = ScreenUtils.getScreenWidthHeight();
             lParams.width = screen[0];
             lParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-//            lParams.x = 0;
-//            lParams.y = (screen[1] - ScreenUtils.getStatusHeight(mContext)) / 2;
             lParams.gravity = Gravity.CENTER;
             window.setAttributes(lParams);
         } catch (Exception e) {
@@ -72,10 +70,6 @@ public class QuerySuffixEditDialog extends Dialog implements View.OnClickListene
         // 禁止点击其他地方自动关闭
         this.setCanceledOnTouchOutside(false);
         // ==
-        // 初始化参数
-        initValues();
-        // 初始化View
-        initViews();
         // 设置点击事件
         dqs_cancel_tv.setOnClickListener(this);
         dqs_add_tv.setOnClickListener(this);
@@ -96,12 +90,12 @@ public class QuerySuffixEditDialog extends Dialog implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.dqs_add_tv: // 添加
                 // 获取输入内容
                 String input = dqse_edit_text.getText().toString();
                 // 防止为null
-                if (TextUtils.isEmpty(input)){
+                if (TextUtils.isEmpty(input)) {
                     // 关闭Dialog
                     cancelDialog();
                     return;
@@ -111,7 +105,7 @@ public class QuerySuffixEditDialog extends Dialog implements View.OnClickListene
                 // 获取数据源
                 LinkedHashMap<String, String> maps = QuerySuffixUtils.getQuerySuffixMap();
                 // 判断是否存在key
-                if (maps.containsKey(input)){
+                if (maps.containsKey(input)) {
                     // 关闭Dialog
                     cancelDialog();
                     return;
@@ -132,12 +126,6 @@ public class QuerySuffixEditDialog extends Dialog implements View.OnClickListene
         }
     }
 
-    private void initValues(){
-    }
-
-    private void initViews(){
-    }
-
     // ==
 
     /** 关闭Dialog */
@@ -151,7 +139,7 @@ public class QuerySuffixEditDialog extends Dialog implements View.OnClickListene
     }
 
     /** 显示Dialog */
-    public void showDialog(){
+    public void showDialog() {
         this.show();
     }
 }

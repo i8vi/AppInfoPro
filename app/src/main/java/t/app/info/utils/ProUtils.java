@@ -13,14 +13,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import dev.DevUtils;
+import dev.lib.other.EventBusUtils;
 import dev.utils.app.info.AppInfoBean;
 import dev.utils.app.info.AppInfoUtils;
 import dev.utils.app.logger.DevLogger;
 import dev.utils.app.share.IPreference;
 import dev.utils.app.share.SharedUtils;
-import t.app.info.base.BaseApplication;
-import t.app.info.utils.config.KeyConstants;
-import t.app.info.utils.config.NotifyConstants;
+import t.app.info.base.config.Constants;
+import t.app.info.base.event.QueryAppEvent;
 
 /**
  * detail: 项目工具类
@@ -28,7 +28,7 @@ import t.app.info.utils.config.NotifyConstants;
  */
 public final class ProUtils {
 
-    private ProUtils(){
+    private ProUtils() {
     }
 
     // 日志 TAG
@@ -43,10 +43,10 @@ public final class ProUtils {
      * @param obj
      * @return
      */
-    public static String toJsonString(Object obj){
+    public static String toJsonString(Object obj) {
         try {
             return new GsonBuilder().setPrettyPrinting().create().toJson(obj);
-        } catch (Exception e){
+        } catch (Exception e) {
             DevLogger.eTag(TAG, e, "toJsonString");
         }
         return null;
@@ -55,7 +55,7 @@ public final class ProUtils {
     /**
      * 重置复位
      */
-    public static void reset(){
+    public static void reset() {
         isGetAppsIng = false;
         sMapAppInfos.clear();
     }
@@ -64,7 +64,7 @@ public final class ProUtils {
      * 清空APP数据
      * @param appType
      */
-    public static void clearAppData(AppInfoBean.AppType appType){
+    public static void clearAppData(AppInfoBean.AppType appType) {
         // 清空数据
         sMapAppInfos.put(appType, null);
     }
@@ -74,11 +74,11 @@ public final class ProUtils {
      * @param appType
      * @return
      */
-    public static ArrayList<AppInfoBean> getAppLists(AppInfoBean.AppType appType){
+    public static ArrayList<AppInfoBean> getAppLists(AppInfoBean.AppType appType) {
         // 获取对应的类型应用列表
         ArrayList<AppInfoBean> listApps = sMapAppInfos.get(appType);
-        if (listApps == null){
-            if (isGetAppsIng){
+        if (listApps == null) {
+            if (isGetAppsIng) {
                 return listApps;
             }
             // 表示查询中
@@ -95,7 +95,9 @@ public final class ProUtils {
         return listApps;
     }
 
-    /** 获取 App 列表 */
+    /**
+     * 获取 App 列表
+     */
     private static void getAppLists() {
         // 用户安装应用
         ArrayList<AppInfoBean> listUserApps = new ArrayList<>();
@@ -111,7 +113,7 @@ public final class ProUtils {
             // 获取app 类型
             AppInfoBean.AppType appType = AppInfoBean.getAppType(pInfo);
             // 判断类型
-            switch (appType){
+            switch (appType) {
                 case USER:
                     // 添加符合条件的 App 应用信息
                     listUserApps.add(AppInfoUtils.getAppInfoBean(pInfo.packageName));
@@ -131,8 +133,8 @@ public final class ProUtils {
         sMapAppInfos.put(AppInfoBean.AppType.USER, listUserApps);
         // 保存系统应用
         sMapAppInfos.put(AppInfoBean.AppType.SYSTEM, listSystemApps);
-        // 发送通知
-        BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_QUERY_APPLIST_END_NOTIFY);
+        // 查询应用成功
+        EventBusUtils.sendEvent(new QueryAppEvent(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY));
     }
 
     // -
@@ -141,9 +143,9 @@ public final class ProUtils {
      * 获取排序类型
      * @return
      */
-    public static int getAppSortType(){
+    public static int getAppSortType() {
         // 获取选中索引
-        int sortPos = SharedUtils.get(KeyConstants.KEY_APP_SORT, IPreference.DataType.INTEGER);
+        int sortPos = SharedUtils.get(Constants.Key.KEY_APP_SORT, IPreference.DataType.INTEGER);
         // 获取最大值，防止负数
         sortPos = Math.max(sortPos, 0);
         // 获取排序类型
@@ -155,7 +157,7 @@ public final class ProUtils {
      * @param listApps
      * @return
      */
-    private static void sortAppLists(ArrayList<AppInfoBean> listApps){
+    private static void sortAppLists(ArrayList<AppInfoBean> listApps) {
         // 进行排序
         Collections.sort(listApps, new AppListsComparator(ProUtils.getAppSortType()));
     }
@@ -179,23 +181,23 @@ public final class ProUtils {
         }
 
         public final int compare(AppInfoBean a, AppInfoBean b) {
-            if (a != null && b != null){
-                if (sortType == 0){ // 按应用名称
+            if (a != null && b != null) {
+                if (sortType == 0) { // 按应用名称
                     return a.getAppName().compareTo(b.getAppName());
-                } else if (sortType == 1){ // 文件大小
-                    if (a.getApkSize() == b.getApkSize()){
+                } else if (sortType == 1) { // 文件大小
+                    if (a.getApkSize() == b.getApkSize()) {
                         return 0; // 大小相同
                     } else {
                         return a.getApkSize() > b.getApkSize() ? 1 : -1; // 小的前面, 大的后面
                     }
-                } else if (sortType == 2){ // 安装时间
-                    if (a.getFirstInstallTime() == b.getFirstInstallTime()){
+                } else if (sortType == 2) { // 安装时间
+                    if (a.getFirstInstallTime() == b.getFirstInstallTime()) {
                         return 0; // 安装时间相等
                     } else { //
                         return a.getFirstInstallTime() > b.getFirstInstallTime() ? -1 : 1; // 近期安装的在最前面
                     }
-                }else if (sortType == 3){ // 更新时间
-                    if (a.getLastUpdateTime() == b.getLastUpdateTime()){
+                }else if (sortType == 3) { // 更新时间
+                    if (a.getLastUpdateTime() == b.getLastUpdateTime()) {
                         return 0; // 最后更新时间相同
                     } else {
                         return a.getLastUpdateTime() > b.getLastUpdateTime() ? -1 : 1; // 近期更新的在最前面

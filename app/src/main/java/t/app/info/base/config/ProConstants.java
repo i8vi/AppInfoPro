@@ -1,4 +1,4 @@
-package t.app.info.utils.config;
+package t.app.info.base.config;
 
 import java.io.File;
 
@@ -20,14 +20,8 @@ public final class ProConstants {
     /** SD卡路径 */
     public static final String BASE_SDCARD_PATH = SDCardUtils.getSDCardPath();
 
-    // ---------------------- 本地应用数据 -------------------------
-    /** 数据缓存 cache*/
-    public static final String BASE_APPLICATION_CACHE_PATH = File.separator + BASE_NAME + "Data" + File.separator;
-
-    /** 图片缓存地址 */
-    public static final String AP_IMAGE_CACHE_PATH = BASE_APPLICATION_CACHE_PATH + "ICache" + File.separator;
-
     // ---------------------- 本地SDCard数据 -------------------------
+
     /** 统一文件夹 */
     public static final String PRO_PATH =  BASE_SDCARD_PATH + File.separator + BASE_NAME + File.separator;
 

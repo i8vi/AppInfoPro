@@ -44,14 +44,14 @@ public class ViewHolderItem {
 
     // = 初始化数据 =
 
-    public ViewHolderItem setData(String key, String value, View.OnClickListener onClickListener){
+    public ViewHolderItem setData(String key, String value, View.OnClickListener onClickListener) {
         key_tv.setText(key);
         value_tv.setText(value);
         linear.setOnClickListener(onClickListener);
         return this;
     }
 
-    public ViewHolderItem setData(int key, int value, View.OnClickListener onClickListener){
+    public ViewHolderItem setData(int key, int value, View.OnClickListener onClickListener) {
         key_tv.setText(key);
         value_tv.setText(value);
         linear.setOnClickListener(onClickListener);

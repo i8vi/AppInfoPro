@@ -12,8 +12,9 @@ import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dev.utils.app.AppUtils;
 import dev.utils.app.ScreenUtils;
-import dev.utils.app.toast.ToastUtils;
+import dev.utils.app.toast.ToastTintUtils;
 import t.app.info.R;
 import t.app.info.adapters.QuerySuffixAdapter;
 
@@ -56,8 +57,6 @@ public class QuerySuffixDialog extends Dialog implements View.OnClickListener {
             int[] screen = ScreenUtils.getScreenWidthHeight();
             lParams.width = screen[0];
             lParams.height = screen[1];
-//            lParams.x = 0;
-//            lParams.y = (screen[1] - ScreenUtils.getStatusHeight(mContext)) / 2;
             lParams.gravity = Gravity.CENTER;
             window.setAttributes(lParams);
         } catch (Exception e) {
@@ -69,35 +68,30 @@ public class QuerySuffixDialog extends Dialog implements View.OnClickListener {
         // ==
         // 初始化参数
         initValues();
-        // 初始化View
-        initViews();
         // 设置点击事件
         dqs_close_tv.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.dqs_close_tv: // 取消
                 // 提示设置生效
-                ToastUtils.showShort(mContext, R.string.setting_scan_suffix_suc);
+                ToastTintUtils.success(AppUtils.getString(R.string.setting_scan_suffix_suc));
                 // 关闭Dialog
                 cancelDialog();
                 break;
         }
     }
 
-    private void initValues(){
+    private void initValues() {
         // 初始化适配器并绑定
         mQuerySuffixAdapter = new QuerySuffixAdapter(getContext());
         dqs_recycleview.setAdapter(mQuerySuffixAdapter);
         LinearLayoutManager manager = new LinearLayoutManager(mContext);
         dqs_recycleview.setLayoutManager(manager);
         // 刷新数据源
-        mQuerySuffixAdapter.refListDatas();
-    }
-
-    private void initViews(){
+        mQuerySuffixAdapter.refData();
     }
 
     // ==
@@ -110,7 +104,7 @@ public class QuerySuffixDialog extends Dialog implements View.OnClickListener {
     }
 
     /** 显示Dialog */
-    public void showDialog(){
+    public void showDialog() {
         this.show();
     }
 }

@@ -24,9 +24,8 @@ import t.app.info.activitys.MainActivity;
 import t.app.info.adapters.AppListAdapter;
 import t.app.info.base.BaseApplication;
 import t.app.info.base.BaseFragment;
-import t.app.info.base.observer.DevObserverNotify;
+import t.app.info.base.config.Constants;
 import t.app.info.utils.ProUtils;
-import t.app.info.utils.config.NotifyConstants;
 import t.app.info.widgets.StateLayout;
 
 /**
@@ -53,7 +52,7 @@ public class AppListFragment extends BaseFragment {
      * @param appType
      * @return
      */
-    public static BaseFragment getInstance(AppInfoBean.AppType appType){
+    public static BaseFragment getInstance(AppInfoBean.AppType appType) {
         AppListFragment bFragment = new AppListFragment();
         bFragment.mAppType = appType;
         return bFragment;
@@ -68,7 +67,7 @@ public class AppListFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if(rView != null){
+        if(rView != null) {
             ViewGroup parent = (ViewGroup) rView.getParent();
             // 删除以及在显示的View,防止切回来不加载,一边空白
             if (parent != null) {
@@ -93,7 +92,7 @@ public class AppListFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if(hidden){
+        if(hidden) {
             onPause();
             onStop();
         } else {
@@ -105,7 +104,7 @@ public class AppListFragment extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(this.isHidden()){
+        if(this.isHidden()) {
             return;
         }
     }
@@ -113,11 +112,11 @@ public class AppListFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(this.isHidden()){
+        if(this.isHidden()) {
             return;
         }
         // 获取列表
-        vHandler.sendEmptyMessage(NotifyConstants.H_QUERY_APPLIST_END_NOTIFY);
+        vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY);
     }
 
     @Override
@@ -136,14 +135,14 @@ public class AppListFragment extends BaseFragment {
         try {
             // 注销观察者模式
             BaseApplication.sDevObservableNotify.unregisterObserver(TAG + mAppType.name());
-        } catch (Exception e){
+        } catch (Exception e) {
         }
     }
 
     @Override
     public void onClick(View v) {
         super.onClick(v);
-        switch (v.getId()){
+        switch (v.getId()) {
         }
     }
 
@@ -169,12 +168,12 @@ public class AppListFragment extends BaseFragment {
         BaseApplication.sDevObservableNotify.registerObserver(TAG + mAppType.name(), new DevObserverNotify(getActivity()) {
             @Override
             public void onNotify(int nType, Object... args) {
-                switch (nType){
-                    case NotifyConstants.H_REFRESH_NOTIFY:
+                switch (nType) {
+                    case Constants.Notify.H_REFRESH_NOTIFY:
                         // 获取类型
                         AppInfoBean.AppType refType = AppInfoBean.AppType.ALL;
                         // 根据索引判断
-                        switch (MainActivity.getMenuPos()){
+                        switch (MainActivity.getMenuPos()) {
                             case 0:
                                 refType = AppInfoBean.AppType.USER;
                                 break;
@@ -184,30 +183,30 @@ public class AppListFragment extends BaseFragment {
                         }
                         // 类型相同才处理
                         if (mAppType != null && mAppType == refType) {
-                            vHandler.sendEmptyMessage(NotifyConstants.H_REFRESH_NOTIFY);
+                            vHandler.sendEmptyMessage(Constants.Notify.H_REFRESH_NOTIFY);
                             // 发送通知
-                            vHandler.sendEmptyMessage(NotifyConstants.H_QUERY_APPLIST_END_NOTIFY);
+                            vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY);
                         }
                         break;
-                    case NotifyConstants.H_QUERY_APPLIST_END_NOTIFY:
+                    case Constants.Notify.H_QUERY_APPLIST_END_NOTIFY:
                         // 发送通知
                         vHandler.sendEmptyMessage(nType);
                         break;
-                    case NotifyConstants.FOR_R_APP_UNINSTALL:
+                    case Constants.RequestCode.FOR_R_APP_UNINSTALL:
                         try {
                             // 获取包名
                             String packName = (String) args[0];
                             // 属于用户类型
-                            if (mAppType == AppInfoBean.AppType.USER){
+                            if (mAppType == AppInfoBean.AppType.USER) {
                                 // 进行获取
                                 ArrayList<AppInfoBean> lists = ProUtils.getAppLists(mAppType);
                                 // 防止为null
-                                if (lists == null){
+                                if (lists == null) {
                                     return;
                                 }
                                 // 循环判断移除
-                                for (int i = 0, len = lists.size(); i < len; i++){
-                                    if (lists.get(i).getAppPackName().equals(packName)){
+                                for (int i = 0, len = lists.size(); i < len; i++) {
+                                    if (lists.get(i).getAppPackName().equals(packName)) {
                                         AppInfoBean appInfoBean = lists.remove(i); // 删除并返回
                                         listSearchs.remove(appInfoBean); // 删除搜索的数据源
                                         break;
@@ -216,38 +215,38 @@ public class AppListFragment extends BaseFragment {
                                 // 保存新的数据
                                 ProUtils.sMapAppInfos.put(mAppType, lists);
                                 // 发送通知
-                                vHandler.sendEmptyMessage(NotifyConstants.H_QUERY_APPLIST_END_NOTIFY);
+                                vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY);
                             }
-                        } catch (Exception e){
+                        } catch (Exception e) {
                         }
                         break;
                     /** 切换Fragment 通知 */
-                    case NotifyConstants.H_TOGGLE_FRAGMENT_NOTIFY:
+                    case Constants.Notify.H_TOGGLE_FRAGMENT_NOTIFY:
                         // 合并表示不属于搜索
                         isSearch = false;
                         // 清空数据
                         listSearchs.clear();
                         break;
                     /** 搜索合并通知 */
-                    case NotifyConstants.H_SEARCH_COLLAPSE:
+                    case Constants.Notify.H_SEARCH_COLLAPSE:
                         // 合并表示不属于搜索
                         isSearch = false;
                         // 发送通知
-                        vHandler.sendEmptyMessage(NotifyConstants.H_QUERY_APPLIST_END_NOTIFY);
+                        vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY);
                         break;
                     /** 搜索展开通知 */
-                    case NotifyConstants.H_SEARCH_EXPAND:
+                    case Constants.Notify.H_SEARCH_EXPAND:
                         // 展开表示属于搜索
                         isSearch = true;
                         // 删除旧的数据
                         listSearchs.clear();
                         break;
                     /** 搜索输入内容通知 */
-                    case NotifyConstants.H_SEARCH_INPUT_CONTENT:
+                    case Constants.Notify.H_SEARCH_INPUT_CONTENT:
                         // 获取类型
                         AppInfoBean.AppType notifyType = AppInfoBean.AppType.ALL;
                         // 根据索引判断
-                        switch (MainActivity.getMenuPos()){
+                        switch (MainActivity.getMenuPos()) {
                             case 0:
                                 notifyType = AppInfoBean.AppType.USER;
                                 break;
@@ -263,10 +262,10 @@ public class AppListFragment extends BaseFragment {
                                 // 进行筛选处理
                                 filterAppList(ProUtils.getAppLists(mAppType), listSearchs, (String) args[0]);
                             } catch (Exception e) {
-                                DevLogger.eTag(TAG, e, "NotifyConstants.H_SEARCH_INPUT_CONTENT");
+                                DevLogger.eTag(TAG, e, "Constants.Notify.H_SEARCH_INPUT_CONTENT");
                             }
                             Message msg = new Message();
-                            msg.what = NotifyConstants.H_QUERY_APPLIST_END_NOTIFY;
+                            msg.what = Constants.Notify.H_QUERY_APPLIST_END_NOTIFY;
                             msg.obj = args[0];
                             // 发送通知
                             vHandler.sendMessage(msg);
@@ -285,41 +284,41 @@ public class AppListFragment extends BaseFragment {
     // ==
 
     /** View 操作Handler */
-    Handler vHandler = new Handler(){
+    Handler vHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             // 如果页面已经关闭,则不进行处理
-            if (ActivityManager.isFinishingCtx(mContext)){
+            if (ActivityManager.isFinishingCtx(mContext)) {
                 return;
             }
             // 判断通知类型
-            switch (msg.what){
-                case NotifyConstants.H_REFRESH_NOTIFY: // 刷新通知
+            switch (msg.what) {
+                case Constants.Notify.H_REFRESH_NOTIFY: // 刷新通知
                     mAppListAdapter.clearData();
                     break;
-                case NotifyConstants.H_QUERY_APPLIST_END_NOTIFY:
+                case Constants.Notify.H_QUERY_APPLIST_END_NOTIFY:
                     // 判断是否搜索
-                    if (isSearch){
+                    if (isSearch) {
                         // 判断是否存在数据
-                        if (listSearchs.size() != 0){
+                        if (listSearchs.size() != 0) {
                             // 刷新状态
                             fal_statelayout.setState(StateLayout.State.QUERY_END, DevCommonUtils.length(listSearchs));
                             // 判断根据操作类型判断
-                            mAppListAdapter.setListDatas(listSearchs);
+                            mAppListAdapter.setData(listSearchs);
                         } else { // 判断是否输入内容
                             // 判断是否存在内容
                             String searchContent = "";
-                            if (msg.obj != null){
+                            if (msg.obj != null) {
                                 try {
                                     searchContent = (String) msg.obj;
-                                } catch (Exception e){
+                                } catch (Exception e) {
                                 }
                             }
                             // 判断是否为null
                             boolean isEmpty = TextUtils.isEmpty(searchContent);
                             // 显示提示
-                            if (isEmpty){
+                            if (isEmpty) {
                                 // 获取数据源
                                 ArrayList<AppInfoBean> listApps = ProUtils.getAppLists(mAppType);
                                 // 判断是否存在数据
@@ -327,12 +326,12 @@ public class AppListFragment extends BaseFragment {
                                 // 刷新状态
                                 fal_statelayout.setState(((size == -1) ? StateLayout.State.REFRESH : StateLayout.State.QUERY_END), size);
                                 // 判断根据操作类型判断
-                                mAppListAdapter.setListDatas(listApps);
+                                mAppListAdapter.setData(listApps);
                             } else {
                                 // 设置搜索没数据提示
                                 fal_statelayout.setStateToSearchNoData(searchContent);
                                 // 刷新数据
-                                mAppListAdapter.setListDatas(new ArrayList<AppInfoBean>());
+                                mAppListAdapter.setData(new ArrayList<AppInfoBean>());
                             }
                         }
                     } else {
@@ -343,7 +342,7 @@ public class AppListFragment extends BaseFragment {
                         // 刷新状态
                         fal_statelayout.setState(((size == -1) ? StateLayout.State.REFRESH : StateLayout.State.QUERY_END), size);
                         // 判断根据操作类型判断
-                        mAppListAdapter.setListDatas(listApps);
+                        mAppListAdapter.setData(listApps);
                     }
                     break;
             }
@@ -355,8 +354,8 @@ public class AppListFragment extends BaseFragment {
     /**
      * 滑动到顶部
      */
-    public void onScrollTop(){
-        if (fal_recycleview != null){
+    public void onScrollTop() {
+        if (fal_recycleview != null) {
             fal_recycleview.scrollToPosition(0);
         }
     }
@@ -374,11 +373,11 @@ public class AppListFragment extends BaseFragment {
      * @param listSearchs 筛选结果
      * @param sContent 筛选关键字
      */
-    private int filterAppList(List<AppInfoBean> listDatas, List<AppInfoBean> listSearchs, String sContent){
+    private int filterAppList(List<AppInfoBean> listDatas, List<AppInfoBean> listSearchs, String sContent) {
         // 数据总数
         int size = 0;
         // 防止数据为null
-        if (listDatas != null){
+        if (listDatas != null) {
             // 保存临时数据 - 主要是预防搜索途中,进行加载，导致遍历List中数据源改变，导致抛出异常 ConcurrentModificationException
             ArrayList<AppInfoBean> listTemps = new ArrayList<>(listDatas);
             // 进行遍历临时数据源
@@ -386,7 +385,7 @@ public class AppListFragment extends BaseFragment {
                 // 获取单独的实体类
                 AppInfoBean appInfoBean = listTemps.get(i);
                 // 判断是否包含
-                if (DevCommonUtils.isContains(true, sContent, appInfoBean.getAppName(), appInfoBean.getAppPackName())){
+                if (DevCommonUtils.isContains(true, sContent, appInfoBean.getAppName(), appInfoBean.getAppPackName())) {
                     // 保存数据
                     listSearchs.add(appInfoBean);
                     // 进行累加

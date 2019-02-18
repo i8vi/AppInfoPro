@@ -84,7 +84,7 @@ public class StateLayout extends FrameLayout {
      * 设置View 状态
      * @param state
      */
-    public void setState(State state){
+    public void setState(State state) {
         setState(state, -1);
     }
 
@@ -93,11 +93,11 @@ public class StateLayout extends FrameLayout {
      * @param state
      * @param size 数据总数
      */
-    public void setState(State state, int size){
+    public void setState(State state, int size) {
         // 停止动画
         isl_load_view.stop();
         // 判断类型
-        switch (state){
+        switch (state) {
             case REFRESH: // 刷新中
                 // 隐藏全部View
                 ViewUtils.setVisibilitys(false, getChildViews());
@@ -127,7 +127,7 @@ public class StateLayout extends FrameLayout {
      * 设置搜索没数据提示
      * @param searchContent 搜索内容
      */
-    public void setStateToSearchNoData(String searchContent){
+    public void setStateToSearchNoData(String searchContent) {
         // 搜索无数据
         setState(State.SEARCH_NO_DATA);
         // 格式化显示内容
@@ -140,12 +140,12 @@ public class StateLayout extends FrameLayout {
      * 获取全部View
      * @return
      */
-    private View[] getChildViews(){
+    private View[] getChildViews() {
         FrameLayout frameLayout = (FrameLayout) getChildAt(0);
         // 获取全部View
         View[] views = new View[frameLayout.getChildCount() + 1];
         // 保存View
-        for (int i = 0, len = views.length; i < len; i++){
+        for (int i = 0, len = views.length; i < len; i++) {
             views[i] = frameLayout.getChildAt(i);
         }
         // 返回全部子View

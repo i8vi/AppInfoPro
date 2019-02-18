@@ -11,23 +11,24 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import dev.utils.app.info.AppInfoBean;
+import dev.utils.common.DevCommonUtils;
 import t.app.info.R;
 import t.app.info.activitys.AppDetailsActivity;
-import t.app.info.utils.config.KeyConstants;
-import t.app.info.utils.config.NotifyConstants;
+import t.app.info.base.config.Constants;
 
 /**
  * detail: App 列表 Adapter
  * Created by Ttt
  */
-public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHolder>{
+public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHolder> {
 
     // 上下文
     private Activity mActivity;
     // 数据源
-    private ArrayList<AppInfoBean> listDatas = new ArrayList<>();
+    private List<AppInfoBean> mList = new ArrayList<>();
 
     /**
      * 初始化适配器
@@ -41,7 +42,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ViewHolder viewHolder = null;
         // 判断类型
-        if (viewType == 0){
+        if (viewType == 0) {
             View itemView = LayoutInflater.from(mActivity).inflate(R.layout.item_app_info, null, false);
             viewHolder = new ViewHolder(itemView, viewType);
         }
@@ -51,14 +52,14 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        // 获取实体类
-        AppInfoBean appInfoBean = listDatas.get(position);
         // 判断类型
-        if (holder.iType == 0){
+        if (holder.iType == 0) {
+            // 获取实体类
+            AppInfoBean appInfoBean = mList.get(position);
             // 设置 app 名
-            holder.iai_name_tv.setText(appInfoBean.getAppName() + "");
+            holder.iai_name_tv.setText(DevCommonUtils.toCheckValue(appInfoBean.getAppName()));
             // 设置 app 包名
-            holder.iai_pack_tv.setText(appInfoBean.getAppPackName() + "");
+            holder.iai_pack_tv.setText(DevCommonUtils.toCheckValue(appInfoBean.getAppPackName()));
             // 设置 app 图标
             holder.iai_igview.setImageDrawable(appInfoBean.getAppIcon());
         }
@@ -66,7 +67,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return listDatas.size();
+        return DevCommonUtils.length(mList);
     }
 
     @Override
@@ -85,15 +86,15 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         TextView iai_name_tv;
         TextView iai_pack_tv;
 
-        public ViewHolder(View itemView, int iType){
+        public ViewHolder(View itemView, int iType) {
             super(itemView);
             this.iType = iType;
             // 判断类型
             if (iType == 0) {
-                iai_rela = (RelativeLayout) itemView.findViewById(R.id.iai_rela);
-                iai_igview = (ImageView) itemView.findViewById(R.id.iai_igview);
-                iai_name_tv = (TextView) itemView.findViewById(R.id.iai_name_tv);
-                iai_pack_tv = (TextView) itemView.findViewById(R.id.iai_pack_tv);
+                iai_rela = itemView.findViewById(R.id.iai_rela);
+                iai_igview = itemView.findViewById(R.id.iai_igview);
+                iai_name_tv = itemView.findViewById(R.id.iai_name_tv);
+                iai_pack_tv = itemView.findViewById(R.id.iai_pack_tv);
                 // 设置点击事件
                 iai_rela.setOnClickListener(this);
             }
@@ -102,15 +103,13 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         @Override
         public void onClick(View view) {
             // 判断类型
-            if (iType == 0){
-                // 获取当前索引
-                int pos = getLayoutPosition();
+            if (iType == 0) {
                 // 获取Item
-                AppInfoBean appInfoBean = listDatas.get(pos);
+                AppInfoBean appInfoBean = mList.get(getLayoutPosition());
                 // 进行跳转
                 Intent intent = new Intent(mActivity, AppDetailsActivity.class);
-                intent.putExtra(KeyConstants.KEY_PACKNAME, appInfoBean.getAppPackName());
-                mActivity.startActivityForResult(intent, NotifyConstants.FOR_R_APP_DETAILS);
+                intent.putExtra(Constants.Key.KEY_PACKNAME, appInfoBean.getAppPackName());
+                mActivity.startActivityForResult(intent, Constants.RequestCode.FOR_R_APP_DETAILS);
             }
         }
     }
@@ -119,13 +118,13 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
 
     /**
      * 设置数据源
-     * @param listDatas
+     * @param lists
      */
-    public void setListDatas(ArrayList<AppInfoBean> listDatas) {
-        if (listDatas == null){
-            return;
+    public void setData(List<AppInfoBean> lists) {
+        this.mList.clear();
+        if (lists != null) {
+            this.mList.addAll(lists);
         }
-        this.listDatas = listDatas;
         // 刷新适配器
         notifyDataSetChanged();
     }
@@ -133,8 +132,8 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
     /**
      * 清空数据
      */
-    public void clearData(){
-        this.listDatas.clear();
+    public void clearData() {
+        this.mList.clear();
         // 刷新适配器
         notifyDataSetChanged();
     }

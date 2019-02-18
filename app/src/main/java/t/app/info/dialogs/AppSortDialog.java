@@ -14,13 +14,13 @@ import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dev.lib.other.EventBusUtils;
 import dev.utils.app.ScreenUtils;
 import dev.utils.app.share.SharedUtils;
 import t.app.info.R;
-import t.app.info.base.BaseApplication;
+import t.app.info.base.config.Constants;
+import t.app.info.base.event.SortEvent;
 import t.app.info.utils.ProUtils;
-import t.app.info.utils.config.KeyConstants;
-import t.app.info.utils.config.NotifyConstants;
 
 /**
  * detail: App 排序 Dialog
@@ -57,8 +57,6 @@ public class AppSortDialog extends Dialog implements View.OnClickListener {
             int[] screen = ScreenUtils.getScreenWidthHeight();
             lParams.width = screen[0];
             lParams.height = screen[1];
-//            lParams.x = 0;
-//            lParams.y = (screen[1] - ScreenUtils.getStatusHeight(mContext)) / 2;
             lParams.gravity = Gravity.CENTER;
             window.setAttributes(lParams);
         } catch (Exception e) {
@@ -75,21 +73,19 @@ public class AppSortDialog extends Dialog implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.das_cancel_tv: // 取消
                 cancelDialog();
                 break;
         }
     }
 
-    private void initViews(){
-        // https://blog.csdn.net/qq_33000225/article/details/53540263
-        // LayoutInflater
+    private void initViews() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         // 获取数据
         String[] appSortArys = mContext.getResources().getStringArray(R.array.appSortArys);
         // 遍历添加
-        for (int i = 0, len = appSortArys.length; i < len; i++){
+        for (int i = 0, len = appSortArys.length; i < len; i++) {
             // 当前索引
             final int pos = i;
             // 引入View
@@ -107,11 +103,11 @@ public class AppSortDialog extends Dialog implements View.OnClickListener {
                     // 获取选中索引
                     int sortPos = ProUtils.getAppSortType();
                     // 如果id不一样则才处理
-                    if (pos != sortPos){
+                    if (pos != sortPos) {
                         // 保存索引
-                        SharedUtils.put(KeyConstants.KEY_APP_SORT, pos);
-                        // 进行通知排序变更
-                        BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_APP_SORT_NOTIFY);
+                        SharedUtils.put(Constants.Key.KEY_APP_SORT, pos);
+                        // 排序变更通知
+                        EventBusUtils.sendEvent(new SortEvent(Constants.Notify.H_APP_SORT_NOTIFY));
                     }
                     // 关闭
                     cancelDialog();
@@ -126,15 +122,19 @@ public class AppSortDialog extends Dialog implements View.OnClickListener {
 
     // ==
 
-    /** 关闭Dialog */
+    /**
+     * 关闭Dialog
+     */
     public void cancelDialog() {
         if (this.isShowing()) {
             this.cancel();
         }
     }
 
-    /** 显示Dialog */
-    public void showDialog(){
+    /**
+     * 显示Dialog
+     */
+    public void showDialog() {
         this.show();
     }
 }

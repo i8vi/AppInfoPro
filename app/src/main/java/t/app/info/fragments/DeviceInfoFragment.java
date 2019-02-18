@@ -28,11 +28,10 @@ import t.app.info.R;
 import t.app.info.adapters.DeviceInfoAdapter;
 import t.app.info.base.BaseApplication;
 import t.app.info.base.BaseFragment;
-import t.app.info.base.observer.DevObserverNotify;
+import t.app.info.base.config.Constants;
+import t.app.info.base.config.ProConstants;
 import t.app.info.beans.DeviceInfoBean;
 import t.app.info.beans.item.DeviceInfoItem;
-import t.app.info.utils.config.NotifyConstants;
-import t.app.info.utils.config.ProConstants;
 
 /**
  * detail: 设备信息 - Fragment
@@ -52,7 +51,7 @@ public class DeviceInfoFragment extends BaseFragment {
     /**
      * 获取对象,并且设置数据
      */
-    public static BaseFragment getInstance(){
+    public static BaseFragment getInstance() {
         DeviceInfoFragment bFragment = new DeviceInfoFragment();
         return bFragment;
     }
@@ -66,7 +65,7 @@ public class DeviceInfoFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if(rView != null){
+        if(rView != null) {
             ViewGroup parent = (ViewGroup) rView.getParent();
             // 删除以及在显示的View,防止切回来不加载,一边空白
             if (parent != null) {
@@ -91,7 +90,7 @@ public class DeviceInfoFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if(hidden){
+        if(hidden) {
             onPause();
             onStop();
         } else {
@@ -103,7 +102,7 @@ public class DeviceInfoFragment extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(this.isHidden()){
+        if(this.isHidden()) {
             return;
         }
     }
@@ -111,7 +110,7 @@ public class DeviceInfoFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(this.isHidden()){
+        if(this.isHidden()) {
             return;
         }
         // 发送请求获取
@@ -144,7 +143,7 @@ public class DeviceInfoFragment extends BaseFragment {
     @Override
     public void onClick(View v) {
         super.onClick(v);
-        switch (v.getId()){
+        switch (v.getId()) {
         }
     }
 
@@ -170,8 +169,8 @@ public class DeviceInfoFragment extends BaseFragment {
         BaseApplication.sDevObservableNotify.registerObserver(TAG, new DevObserverNotify(getActivity()) {
             @Override
             public void onNotify(int nType, Object... args) {
-                switch (nType){
-                    case NotifyConstants.H_EXPORT_DEVICE_MSG_NOTIFY:
+                switch (nType) {
+                    case Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY:
                         // 发送通知
                         vHandler.sendEmptyMessage(nType);
                         break;
@@ -188,27 +187,27 @@ public class DeviceInfoFragment extends BaseFragment {
     // ==
 
     /** View 操作Handler */
-    Handler vHandler = new Handler(){
+    Handler vHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             // 如果页面已经关闭,则不进行处理
-            if (ActivityManager.isFinishingCtx(mContext)){
+            if (ActivityManager.isFinishingCtx(mContext)) {
                 return;
             }
             // 判断通知类型
-            switch (msg.what){
-                case NotifyConstants.H_QUERY_DEVICE_INFO_END_NOTIFY:
+            switch (msg.what) {
+                case Constants.Notify.H_QUERY_DEVICE_INFO_END_NOTIFY:
                     // 刷新适配器
-                    mDeviceInfoAdapter.setListDatas(mListDeviceInfos);
+                    mDeviceInfoAdapter.setData(mListDeviceInfos);
                     break;
-                case NotifyConstants.H_EXPORT_DEVICE_MSG_NOTIFY:
+                case Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY:
                     // 导出数据
                     boolean result = FileUtils.saveFile(ProConstants.EXPORT_PATH, "deviceinfo.txt", DeviceInfoBean.obtain(mListDeviceInfos));
                     // 获取提示内容
                     String tips = mContext.getString(result ? R.string.export_suc : R.string.export_fail);
                     // 判断结果
-                    if (result){
+                    if (result) {
                         // 拼接保存路径
                         tips += " " + ProConstants.EXPORT_PATH + "deviceinfo.txt";
                     }
@@ -224,14 +223,14 @@ public class DeviceInfoFragment extends BaseFragment {
     /**
      * 滑动到顶部
      */
-    public void onScrollTop(){
-        if (fdi_recycleview != null){
+    public void onScrollTop() {
+        if (fdi_recycleview != null) {
             fdi_recycleview.scrollToPosition(0);
         }
     }
 
     /** 获取手机信息 */
-    private void getDeviceInfos(){
+    private void getDeviceInfos() {
         // https://blog.csdn.net/xx326664162/article/details/52438706
         // https://blog.csdn.net/litianquan/article/details/78572617
         // https://blog.csdn.net/lchad/article/details/43716893
@@ -246,7 +245,7 @@ public class DeviceInfoFragment extends BaseFragment {
         // 设备信息
         HashMap<String, String> mapDeviceInfos = new HashMap<>();
         // 进行初始化获取
-        DeviceUtils.getDeviceInfo2(mapDeviceInfos);
+        DeviceUtils.getDeviceInfo(mapDeviceInfos);
         mListDeviceInfos.clear();
         // 获取手机型号
         mListDeviceInfos.add(new DeviceInfoItem(R.string.model, android.os.Build.MODEL + ""));
@@ -280,19 +279,19 @@ public class DeviceInfoFragment extends BaseFragment {
             // 判断是否模拟器
             String result = mapDeviceInfos.get("IS_EMULATOR".toLowerCase());
             // 存在结果才显示
-            if (!TextUtils.isEmpty(result)){
+            if (!TextUtils.isEmpty(result)) {
                 mListDeviceInfos.add(new DeviceInfoItem(R.string.is_emulator, result));
             }
-        } catch (Exception e){
+        } catch (Exception e) {
         }
         try {
             // 判断是否允许debug调试
             String result = mapDeviceInfos.get("IS_DEBUGGABLE".toLowerCase());
             // 存在结果才显示
-            if (!TextUtils.isEmpty(result)){
+            if (!TextUtils.isEmpty(result)) {
                 mListDeviceInfos.add(new DeviceInfoItem(R.string.is_debuggable, result));
             }
-        } catch (Exception e){
+        } catch (Exception e) {
         }
         // 获取基带版本
         mListDeviceInfos.add(new DeviceInfoItem(R.string.baseband_version, DeviceUtils.getBaseband_Ver() + ""));
@@ -315,10 +314,10 @@ public class DeviceInfoFragment extends BaseFragment {
             // 判断支持的指令集
             String result = mapDeviceInfos.get("SUPPORTED_ABIS".toLowerCase());
             // 存在结果才显示
-            if (!TextUtils.isEmpty(result)){
+            if (!TextUtils.isEmpty(result)) {
                 mListDeviceInfos.add(new DeviceInfoItem(R.string.supported_abis, result));
             }
-        } catch (Exception e){
+        } catch (Exception e) {
         }
         // 获取 CPU 数量
         mListDeviceInfos.add(new DeviceInfoItem(R.string.cpu_number, CPUUtils.getCoresNumbers() + ""));
@@ -330,6 +329,6 @@ public class DeviceInfoFragment extends BaseFragment {
         mListDeviceInfos.add(new DeviceInfoItem(R.string.cpu_cur, CPUUtils.getCurCpuFreq() + ""));
 
         // 发送通知
-        vHandler.sendEmptyMessage(NotifyConstants.H_QUERY_DEVICE_INFO_END_NOTIFY);
+        vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_DEVICE_INFO_END_NOTIFY);
     }
 }

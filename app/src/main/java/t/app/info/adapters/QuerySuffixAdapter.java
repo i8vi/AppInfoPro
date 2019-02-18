@@ -11,8 +11,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
+import dev.utils.common.DevCommonUtils;
 import t.app.info.R;
 import t.app.info.dialogs.QuerySuffixEditDialog;
 import t.app.info.utils.QuerySuffixUtils;
@@ -21,12 +23,12 @@ import t.app.info.utils.QuerySuffixUtils;
  * detail: 搜索后缀 Adapter
  * Created by Ttt
  */
-public class QuerySuffixAdapter extends RecyclerView.Adapter<QuerySuffixAdapter.ViewHolder>{
+public class QuerySuffixAdapter extends RecyclerView.Adapter<QuerySuffixAdapter.ViewHolder> {
 
     // 上下文
     private Context mContext;
     // 数据源
-    private ArrayList<String> listDatas = new ArrayList<>();
+    private List<String> mList = new ArrayList<>();
     // 获取搜索配置
     private LinkedHashMap<String, String> mQuerySuffixMaps = new LinkedHashMap<>();
 
@@ -48,25 +50,25 @@ public class QuerySuffixAdapter extends RecyclerView.Adapter<QuerySuffixAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         // 获取实体类
-        String content = listDatas.get(position);
+        String content = mList.get(position);
         // 判断类型
-        if (holder.iType == 0){
+        if (holder.iType == 0) {
             // 设置提示文案
-            holder.iqs_suffix_tv.setText(content);
+            holder.iqs_suffix_tv.setText(DevCommonUtils.toCheckValue(content));
         }
     }
 
     @Override
     public int getItemCount() {
-        return listDatas.size();
+        return DevCommonUtils.length(mList);
     }
 
     @Override
     public int getItemViewType(int position) {
         // 获取Item
-        final String suffix = listDatas.get(position);
+        final String suffix = mList.get(position);
         // 判断是否为null
-        if (suffix == null){
+        if (suffix == null) {
             return 1;
         }
         return 0;
@@ -83,13 +85,13 @@ public class QuerySuffixAdapter extends RecyclerView.Adapter<QuerySuffixAdapter.
         FrameLayout iqs_framelayout;
         ImageView iqs_igview;
 
-        public ViewHolder(View itemView, int iType){
+        public ViewHolder(View itemView, int iType) {
             super(itemView);
             this.iType = iType;
             // 初始化View
-            iqs_suffix_tv = (TextView) itemView.findViewById(R.id.iqs_suffix_tv);
-            iqs_framelayout = (FrameLayout) itemView.findViewById(R.id.iqs_framelayout);
-            iqs_igview = (ImageView) itemView.findViewById(R.id.iqs_igview);
+            iqs_suffix_tv = itemView.findViewById(R.id.iqs_suffix_tv);
+            iqs_framelayout = itemView.findViewById(R.id.iqs_framelayout);
+            iqs_igview = itemView.findViewById(R.id.iqs_igview);
             // 判断类型
             if (iType == 0) {
                 iqs_igview.setImageResource(R.drawable.ic_close);
@@ -98,25 +100,25 @@ public class QuerySuffixAdapter extends RecyclerView.Adapter<QuerySuffixAdapter.
                     @Override
                     public void onClick(View v) {
                         // 删除配置
-                        mQuerySuffixMaps.remove(listDatas.get(getLayoutPosition()));
+                        mQuerySuffixMaps.remove(mList.get(getLayoutPosition()));
                         // 刷新配置
                         QuerySuffixUtils.refConfig(mQuerySuffixMaps);
                         // 刷新数据源
-                        refListDatas();
+                        refData();
                     }
                 });
-            } else if (iType == 1){ // 表示添加
+            } else if (iType == 1) { // 表示添加
                 iqs_igview.setImageResource(R.drawable.ic_add);
                 // 设置点击事件
                 iqs_framelayout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         // 显示添加Dialog
-                        new QuerySuffixEditDialog(mContext, new View.OnClickListener(){
+                        new QuerySuffixEditDialog(mContext, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 // 刷新数据源
-                                refListDatas();
+                                refData();
                             }
                         }).showDialog();
                     }
@@ -130,19 +132,19 @@ public class QuerySuffixAdapter extends RecyclerView.Adapter<QuerySuffixAdapter.
     /**
      * 刷新数据源
      */
-    public void refListDatas(){
-        setListDatas(getDatas());
+    public void refData() {
+        setData(getDatas());
     }
 
     /**
      * 设置数据源
-     * @param listDatas
+     * @param lists
      */
-    public void setListDatas(ArrayList<String> listDatas) {
-        if (listDatas == null){
-            return;
+    private void setData(ArrayList<String> lists) {
+        this.mList.clear();
+        if (lists != null) {
+            this.mList.addAll(lists);
         }
-        this.listDatas = listDatas;
         // 刷新适配器
         notifyDataSetChanged();
     }
@@ -151,14 +153,14 @@ public class QuerySuffixAdapter extends RecyclerView.Adapter<QuerySuffixAdapter.
      * 获取数据源
      * @return
      */
-    private ArrayList<String> getDatas(){
+    private ArrayList<String> getDatas() {
         // 保存数据
         mQuerySuffixMaps = QuerySuffixUtils.getQuerySuffixMap();
         // 默认List 集合
         ArrayList<String> listDatas = new ArrayList<>();
         // 获取并且循环数据源
         Set<String> set = mQuerySuffixMaps.keySet();
-        for (String key : set){
+        for (String key : set) {
             listDatas.add(key);
         }
         // 便于最后判断添加

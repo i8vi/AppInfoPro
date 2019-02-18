@@ -38,14 +38,13 @@ import dev.utils.app.toast.ToastUtils;
 import dev.utils.common.FileUtils;
 import t.app.info.R;
 import t.app.info.base.BaseApplication;
+import t.app.info.base.config.Constants;
+import t.app.info.base.config.ProConstants;
 import t.app.info.base.observer.DevObserverNotify;
 import t.app.info.utils.ProUtils;
-import t.app.info.utils.config.KeyConstants;
-import t.app.info.utils.config.NotifyConstants;
-import t.app.info.utils.config.ProConstants;
 
 /**
- * detail: Apk 详情页面(不一定已安装)
+ * detail: Apk 详情页面
  * Created by Ttt
  */
 public class ApkDetailsActivity extends AppCompatActivity implements View.OnClickListener {
@@ -101,13 +100,13 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.apd_install_apk_tv: // 安装应用
                 // 文件存在处理
-                if (FileUtils.isFileExists(apkInfoItem.getAppInfoBean().getSourceDir())){
+                if (FileUtils.isFileExists(apkInfoItem.getAppInfoBean().getSourceDir())) {
                     // Android 8.0以上
-                    if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O){
-                        if (getPackageManager().canRequestPackageInstalls()){
+                    if (Build.VERSION.SDK_INT >=  Build.VERSION_CODES.O) {
+                        if (getPackageManager().canRequestPackageInstalls()) {
                             // 安装apk
                             AppUtils.installApp(apkInfoItem.getAppInfoBean().getSourceDir(), "t.app.info.fileprovider");
                         } else {
@@ -141,9 +140,9 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
                 break;
             case R.id.apd_delete_apk_tv: // 删除apk文件
                 // 文件存在处理
-                if (FileUtils.isFileExists(apkInfoItem.getAppInfoBean().getSourceDir())){
+                if (FileUtils.isFileExists(apkInfoItem.getAppInfoBean().getSourceDir())) {
                     // 删除文件通知
-                    BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_DELETE_APK_FILE_NOTIFY, apkInfoItem.getAppInfoBean().getSourceDir());
+                    BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_DELETE_APK_FILE_NOTIFY, apkInfoItem.getAppInfoBean().getSourceDir());
                 }
                 // 删除文件
                 FileUtils.deleteFile(apkInfoItem.getAppInfoBean().getSourceDir());
@@ -156,14 +155,14 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
     // ==
 
     /** 初始化操作 */
-    private void initOperate(){
+    private void initOperate() {
         try {
             // 解析获取数据
-            apkInfoItem = AppInfoUtils.getApkInfoItem(getIntent().getStringExtra(KeyConstants.KEY_APK_URI));
-        } catch (Exception e){
+            apkInfoItem = AppInfoUtils.getApkInfoItem(getIntent().getStringExtra(Constants.Key.KEY_APK_URI));
+        } catch (Exception e) {
             DevLogger.eTag(TAG, e, "initOperate");
         }
-        if (apkInfoItem == null){
+        if (apkInfoItem == null) {
             // 提示获取失败
             ToastUtils.showShort(mContext, R.string.get_apkinfo_fail);
             finish(); // 销毁页面
@@ -185,7 +184,7 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
     }
 
     /** 初始化事件 */
-    private void initListeners(){
+    private void initListeners() {
         // 安装应用
         apd_install_apk_tv.setOnClickListener(this);
         // 删除apk文件
@@ -202,8 +201,8 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
         BaseApplication.sDevObservableNotify.registerObserver(this, new DevObserverNotify(this) {
             @Override
             public void onNotify(int nType, Object... args) {
-                switch (nType){
-                    case NotifyConstants.H_EXPORT_APP_MSG_NOTIFY:
+                switch (nType) {
+                    case Constants.Notify.H_EXPORT_APP_MSG_NOTIFY:
                         // 发送通知
                         vHandler.sendEmptyMessage(nType);
                         break;
@@ -215,12 +214,12 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
     // ==
 
     /** View 操作Handler */
-    Handler vHandler = new Handler(){
+    Handler vHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             // 如果页面已经关闭,则不进行处理
-            if (ActivityManager.isFinishingCtx(mContext)){
+            if (ActivityManager.isFinishingCtx(mContext)) {
                 return;
             }
             // 操作结果
@@ -230,8 +229,8 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
             // 获取文件名
             String fileName = "";
             // 判断通知类型
-            switch (msg.what){
-                case NotifyConstants.H_EXPORT_APP_MSG_NOTIFY: // 导出app信息
+            switch (msg.what) {
+                case Constants.Notify.H_EXPORT_APP_MSG_NOTIFY: // 导出app信息
                     // 获取文件名 应用名_包名_版本名.txt
                     fileName = "apkFile_" + apkInfoItem.getAppInfoBean().getAppName() + "_" + apkInfoItem.getAppInfoBean().getAppPackName() + "_" + apkInfoItem.getAppInfoBean().getVersionName() + ".txt";
                     // 导出数据
@@ -239,7 +238,7 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
                     // 获取提示内容
                     tips = mContext.getString(result ? R.string.export_suc : R.string.export_fail);
                     // 判断结果
-                    if (result){
+                    if (result) {
                         // 拼接保存路径
                         tips += " " + ProConstants.EXPORT_APK_MSG_PATH + fileName;
                     }
@@ -253,7 +252,7 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
     /**
      * 刷新数据
      */
-    private void refData(){
+    private void refData() {
         // https://blog.csdn.net/ruingman/article/details/51347650
 
         // 获取app信息
@@ -269,7 +268,7 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
     }
 
     /** 循环遍历添加 View 数据 */
-    private void forViews(){
+    private void forViews() {
         // 清空旧的View
         apd_params_linear.removeAllViews();
         // 数据源
@@ -277,7 +276,7 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
         // LayoutInflater
         LayoutInflater inflater = LayoutInflater.from(this);
         // 遍历添加
-        for (int i = 0, len = lists.size(); i < len; i++){
+        for (int i = 0, len = lists.size(); i < len; i++) {
             // 获取Item
             final KeyValueBean keyValueBean = lists.get(i);
             // 初始化数据源
@@ -324,13 +323,13 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
                 // 判断是否存在读写权限
                 if (ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
                     // 发出通知
-                    BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_EXPORT_APP_MSG_NOTIFY);
+                    BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_APP_MSG_NOTIFY);
                 } else {
                     PermissionUtils.permission(permission).callBack(new PermissionUtils.PermissionCallBack() {
                         @Override
                         public void onGranted(PermissionUtils permissionUtils) {
                             // 发出通知
-                            BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_EXPORT_APP_MSG_NOTIFY);
+                            BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_APP_MSG_NOTIFY);
                         }
 
                         @Override

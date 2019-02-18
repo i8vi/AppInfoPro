@@ -17,13 +17,12 @@ import dev.utils.app.toast.ToastUtils;
 import t.app.info.R;
 import t.app.info.base.BaseApplication;
 import t.app.info.base.BaseFragment;
+import t.app.info.base.config.Constants;
 import t.app.info.base.observer.DevObserverNotify;
 import t.app.info.dialogs.AppSortDialog;
 import t.app.info.dialogs.QuerySuffixDialog;
 import t.app.info.utils.ProUtils;
 import t.app.info.utils.QuerySuffixUtils;
-import t.app.info.utils.config.KeyConstants;
-import t.app.info.utils.config.NotifyConstants;
 
 /**
  * detail: 设置信息 - Fragment
@@ -47,7 +46,7 @@ public class SettingFragment extends BaseFragment {
     /**
      * 获取对象,并且设置数据
      */
-    public static BaseFragment getInstance(){
+    public static BaseFragment getInstance() {
         SettingFragment bFragment = new SettingFragment();
         return bFragment;
     }
@@ -61,7 +60,7 @@ public class SettingFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if(rView != null){
+        if(rView != null) {
             ViewGroup parent = (ViewGroup) rView.getParent();
             // 删除以及在显示的View,防止切回来不加载,一边空白
             if (parent != null) {
@@ -86,7 +85,7 @@ public class SettingFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if(hidden){
+        if(hidden) {
             onPause();
             onStop();
         } else {
@@ -98,7 +97,7 @@ public class SettingFragment extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
-        if(this.isHidden()){
+        if(this.isHidden()) {
             return;
         }
     }
@@ -106,7 +105,7 @@ public class SettingFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(this.isHidden()){
+        if(this.isHidden()) {
             return;
         }
     }
@@ -131,7 +130,7 @@ public class SettingFragment extends BaseFragment {
     @Override
     public void onClick(View v) {
         super.onClick(v);
-        switch (v.getId()){
+        switch (v.getId()) {
         }
     }
 
@@ -157,8 +156,8 @@ public class SettingFragment extends BaseFragment {
         BaseApplication.sDevObservableNotify.registerObserver(TAG, new DevObserverNotify(getActivity()) {
             @Override
             public void onNotify(int nType, Object... args) {
-                switch (nType){
-                    case NotifyConstants.H_APP_SORT_NOTIFY:
+                switch (nType) {
+                    case Constants.Notify.H_APP_SORT_NOTIFY:
                         // 发送通知
                         vHandler.sendEmptyMessage(nType);
                         break;
@@ -186,11 +185,11 @@ public class SettingFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 // 保存索引
-                SharedUtils.put(KeyConstants.KEY_APP_SORT, 0);
+                SharedUtils.put(Constants.Key.KEY_APP_SORT, 0);
                 // 清空后缀
                 QuerySuffixUtils.reset();
                 // 通知刷新
-                vHandler.sendEmptyMessage(NotifyConstants.H_APP_SORT_NOTIFY);
+                vHandler.sendEmptyMessage(Constants.Notify.H_APP_SORT_NOTIFY);
                 // 进行提示
                 ToastUtils.showShort(mContext, R.string.reset_desetting_suc);
             }
@@ -205,17 +204,17 @@ public class SettingFragment extends BaseFragment {
     // ==
 
     /** View 操作Handler */
-    Handler vHandler = new Handler(){
+    Handler vHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             // 如果页面已经关闭,则不进行处理
-            if (ActivityManager.isFinishingCtx(mContext)){
+            if (ActivityManager.isFinishingCtx(mContext)) {
                 return;
             }
             // 判断通知类型
-            switch (msg.what){
-                case NotifyConstants.H_APP_SORT_NOTIFY:
+            switch (msg.what) {
+                case Constants.Notify.H_APP_SORT_NOTIFY:
                     // 重置清空数据
                     ProUtils.reset();
                     // 进行排序
@@ -228,7 +227,7 @@ public class SettingFragment extends BaseFragment {
     // == 外部开放方法 ==
 
     /** 选择App 排序 */
-    private void selectAppSort(){
+    private void selectAppSort() {
         // 更新文案
         fs_appsort_tv.setText(appSortArys[ProUtils.getAppSortType()]);
     }

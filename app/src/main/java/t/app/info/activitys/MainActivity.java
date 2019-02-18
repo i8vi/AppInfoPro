@@ -1,7 +1,6 @@
 package t.app.info.activitys;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,7 +13,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -22,17 +20,21 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
+import dev.utils.app.AppUtils;
 import dev.utils.app.ClickUtils;
 import dev.utils.app.PermissionUtils;
+import dev.utils.app.ViewUtils;
 import dev.utils.app.assist.manager.ActivityManager;
 import dev.utils.app.info.AppInfoBean;
-import dev.utils.app.toast.ToastUtils;
+import dev.utils.app.toast.ToastTintUtils;
 import t.app.info.R;
+import t.app.info.base.BaseActivity;
 import t.app.info.base.BaseApplication;
 import t.app.info.base.BaseFragment;
+import t.app.info.base.config.Constants;
 import t.app.info.fragments.AppListFragment;
 import t.app.info.fragments.DeviceInfoFragment;
 import t.app.info.fragments.QueryApkFragment;
@@ -40,24 +42,21 @@ import t.app.info.fragments.ScreenInfoFragment;
 import t.app.info.fragments.SettingFragment;
 import t.app.info.utils.ProUtils;
 import t.app.info.utils.QuerySDCardUtils;
-import t.app.info.utils.config.NotifyConstants;
 
 /**
  * detail: 首页
  * Created by Ttt
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
-    // 上下文
-    private Context mContext;
     // Fragment管理
-    private FragmentManager fgManager;
+    private FragmentManager mFgManager;
     // 判断当前的 Fragment 索引
     private int mFragmentPos = -1;
     // 当前Menu 索引
     private static int mMenuPos = -1;
-    /** Fragments **/
-    private ArrayList<BaseFragment> mFragments = new ArrayList<>();
+    /** Fragments */
+    private List<BaseFragment> mFragments = new ArrayList<>();
     // ==== View ====
     @BindView(R.id.am_toolbar)
     Toolbar am_toolbar;
@@ -73,16 +72,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 设置View
         setContentView(R.layout.activity_main);
-        // 初始化View
-        ButterKnife.bind(this);
-        // 初始化上下文
-        mContext = this;
-        // 初始化操作
-        initOperate();
-        // 初始化事件
-        initListeners();
 
         // Toolbar
         // https://blog.csdn.net/carlos1992/article/details/50707695
@@ -103,19 +93,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void initMethod() {
+        // 初始化其他操作
+        initOtherOperate();
+        // 初始化事件
+        initListeners();
+    }
+
+    @Override
     public void onBackPressed() {
         // 如果显示了侧边栏, 则关闭
         if (am_drawer_layout.isDrawerOpen(GravityCompat.START)) {
             am_drawer_layout.closeDrawer(GravityCompat.START);
         } else {
             // 判断是否显示, 是的话则关闭
-            if (searchView != null && !searchView.isIconified()){
+            if (searchView != null && !searchView.isIconified()) {
                 searchView.setQuery("", false); // 如果不增加，则会清空内容先
                 searchView.setIconified(true);
                 return;
             }
             // 判断是否首页 - 我的应用, 不是则切换回来
-            if (mFragmentPos != 0){
+            if (mFragmentPos != 0) {
                 toggleFragment(0);
                 // 设置选中第一个
                 am_nav_view.setCheckedItem(R.id.nav_user_apps);
@@ -124,12 +122,10 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             // 判断是否双击退出
-            if (ClickUtils.isFastDoubleClick("quit")){
-                //// 回到桌面 - 需要这句，下面 onBackPressed 则不需要
-                //moveTaskToBack(true);
+            if (ClickUtils.isFastDoubleClick("quit")) {
                 super.onBackPressed();
             } else {
-                ToastUtils.showShort(mContext, R.string.clickReturn);
+                ToastTintUtils.info(AppUtils.getString(R.string.clickReturn));
                 return;
             }
         }
@@ -137,8 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
     // ==
 
-    /** 初始化操作 */
-    private void initOperate(){
+    @Override // 初始化其他操作
+    protected void initOtherOperate() {
+        super.initOtherOperate();
         // 重置处理
         ProUtils.reset();
         // 销毁搜索线程资源
@@ -165,27 +162,28 @@ public class MainActivity extends AppCompatActivity {
         }, 1000);
     }
 
-    /** 初始化事件 */
-    private void initListeners(){
+    @Override // 初始化事件
+    protected void initListeners() {
+        super.initListeners();
         // 设置点击处理 = 双击Title
         am_toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // 判断是否双击
-                if (ClickUtils.isFastDoubleClick(mFragmentPos + "")){
+                if (ClickUtils.isFastDoubleClick(mFragmentPos + "")) {
                     try {
                         // 双击回到顶部
                         mFragments.get(mFragmentPos).onScrollTop();
-                    } catch (Exception e){
+                    } catch (Exception e) {
                     }
                 }
             }
         });
         // 设置Item 点击事件
-        am_nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){
+        am_nav_view.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                switch (item.getItemId()){
+                switch (item.getItemId()) {
                     case R.id.nav_user_apps:
                         toggleFragment(0);
                         // 设置文案
@@ -228,14 +226,14 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     // 回到顶部
                     mFragments.get(mFragmentPos).onScrollTop();
-                } catch (Exception e){
+                } catch (Exception e) {
                 }
             }
         });
     }
 
     /** 初始化 Fragment 集 */
-    private void initFragments(){
+    private void initFragments() {
         // 添加用户
         mFragments.add(AppListFragment.getInstance(AppInfoBean.AppType.USER));
         // 添加系统应用
@@ -252,11 +250,11 @@ public class MainActivity extends AppCompatActivity {
         mFragments.add(SettingFragment.getInstance());
         // --
         // 得到Fragment管理器
-        fgManager = getSupportFragmentManager();
+        mFgManager = getSupportFragmentManager();
         // 初始化添加对应的布局
-        FragmentTransaction fragmentTransaction = fgManager.beginTransaction();
+        FragmentTransaction fragmentTransaction = mFgManager.beginTransaction();
         // 初始化 Fragment 集
-        for (int i = 0, len = mFragments.size(); i < len; i++){
+        for (int i = 0, len = mFragments.size(); i < len; i++) {
             // 添加到集合中
             fragmentTransaction.add(R.id.am_linear, mFragments.get(i), i + "");
             // 隐藏布局
@@ -270,25 +268,25 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * 切换 Fragment 处理
-     * @param mPos
+     * @param pos
      */
-    private void toggleFragment(int mPos) {
+    private void toggleFragment(int pos) {
         // 判断是否想等
-        if (mPos != mFragmentPos){
+        if (pos != mFragmentPos) {
             // 初始化添加对应的布局
-            FragmentTransaction fragmentTransaction = fgManager.beginTransaction();
+            FragmentTransaction fragmentTransaction = mFgManager.beginTransaction();
             // 判断准备显示的 Fragment
-            BaseFragment fragment = mFragments.get(mPos);
+            BaseFragment fragment = mFragments.get(pos);
             // 如果默认未初始化, 则直接显示
-            if (mFragmentPos < 0){
+            if (mFragmentPos < 0) {
                 fragmentTransaction.show(fragment).commit();
             } else {
                 fragmentTransaction.hide(mFragments.get(mFragmentPos)).show(fragment).commit();
             }
             // 重新保存索引
-            mFragmentPos = mPos;
+            mFragmentPos = pos;
             // 保存新的索引
-            mMenuPos = mPos;
+            mMenuPos = pos;
             // 切换改变处理
             toggleChange();
         }
@@ -297,31 +295,31 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 切换改变处理
      */
-    private void toggleChange(){
-        switch (mFragmentPos){
+    private void toggleChange() {
+        switch (mFragmentPos) {
             case 0: // 我的应用
             case 1: // 系统应用
             case 4: // 扫描APK
-                am_top_btn.setVisibility(View.VISIBLE);
+                ViewUtils.setVisibility(true, am_top_btn);
                 break;
             case 2: // 手机信息
             case 3: // 屏幕信息
             case 5: // 设置
             default:
-                am_top_btn.setVisibility(View.GONE);
+                ViewUtils.setVisibility(false, am_top_btn);
                 break;
         }
-        //通知系统更新菜单
+        // 通知系统更新菜单
         supportInvalidateOptionsMenu();
         // 发送通知
-        BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_TOGGLE_FRAGMENT_NOTIFY);
+        BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_TOGGLE_FRAGMENT_NOTIFY);
     }
 
     /**
      * 获取当前 Menu 索引
      * @return
      */
-    public static int getMenuPos(){
+    public static int getMenuPos() {
         return mMenuPos;
     }
 
@@ -336,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
     @Override // 准备显示Menu
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
-        switch (mFragmentPos){
+        switch (mFragmentPos) {
             case 0: // 我的应用
             case 1: // 系统应用
             case 4: // 扫描APK
@@ -354,9 +352,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.bma_refresh: // 刷新
-                switch (mFragmentPos){
+                switch (mFragmentPos) {
                     case 0: // 手机应用
                         ProUtils.clearAppData(AppInfoBean.AppType.USER);
                         break;
@@ -369,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
                 // 进行通知刷新
-                BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_REFRESH_NOTIFY, mFragmentPos);
+                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_REFRESH_NOTIFY, mFragmentPos);
                 break;
             case R.id.bmd_export_item: // 导出
                 // 需要的权限
@@ -377,19 +375,19 @@ public class MainActivity extends AppCompatActivity {
                 // 判断是否存在读写权限
                 if(ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
                     // 发出通知
-                    BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_EXPORT_DEVICE_MSG_NOTIFY);
+                    BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY);
                 } else {
                     PermissionUtils.permission(permission).callBack(new PermissionUtils.PermissionCallBack() {
                         @Override
                         public void onGranted(PermissionUtils permissionUtils) {
                             // 发出通知
-                            BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_EXPORT_DEVICE_MSG_NOTIFY);
+                            BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY);
                         }
 
                         @Override
                         public void onDenied(PermissionUtils permissionUtils) {
                             // 提示导出失败
-                            ToastUtils.showShort(mContext, R.string.export_fail);
+                            ToastTintUtils.error(AppUtils.getString(R.string.export_fail));
                         }
                     }).request();
                 }
@@ -404,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
      * 初始化搜索操作
      * @param menu
      */
-    private void initSearchOperate(Menu menu){
+    private void initSearchOperate(Menu menu) {
         // https://www.jianshu.com/p/16f9e995e454
         // https://www.cnblogs.com/tianzhijiexian/p/4226675.html
         // https://www.jianshu.com/p/7c1e78e91506
@@ -422,7 +420,7 @@ public class MainActivity extends AppCompatActivity {
 //                // 销毁搜索线程资源
 //                setSearchRunnStatus(true);
 //                // 发送通知
-//                BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_SEARCH_EXPAND);
+//                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_EXPAND);
 //                return true;
 //            }
 //
@@ -432,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
 //                // 销毁搜索线程资源
 //                setSearchRunnStatus(true);
 //                // 发送通知
-//                BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_SEARCH_COLLAPSE);
+//                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_COLLAPSE);
 //                return true;
 //            }
 //        });
@@ -443,7 +441,7 @@ public class MainActivity extends AppCompatActivity {
                 // 销毁搜索线程资源
                 setSearchRunnStatus(true);
                 // 发送通知
-                BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_SEARCH_COLLAPSE);
+                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_COLLAPSE);
                 return false;
             }
         });
@@ -454,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
                 // 销毁搜索线程资源
                 setSearchRunnStatus(true);
                 // 发送通知
-                BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_SEARCH_EXPAND);
+                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_EXPAND);
             }
         });
         // 设置搜索文本监听
@@ -492,14 +490,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /** 获取搜索线程 */
+    /**
+     * 获取搜索线程
+     * @return
+     */
     private Runnable getSearchRunnable() {
         if (searchRunn == null) {
             searchRunn = new Runnable() {
                 @Override
                 public void run() {
                     // 延迟触发
-                    vHandler.sendEmptyMessage(NotifyConstants.H_SEARCH_INPUT_CONTENT);
+                    vHandler.sendEmptyMessage(Constants.Notify.H_SEARCH_INPUT_CONTENT);
                 }
             };
         }
@@ -509,22 +510,22 @@ public class MainActivity extends AppCompatActivity {
     // ==
 
     /** View 操作Handler */
-    Handler vHandler = new Handler(){
+    private Handler vHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             // 如果页面已经关闭,则不进行处理
-            if (ActivityManager.isFinishingCtx(mContext)){
+            if (ActivityManager.isFinishingCtx(mContext)) {
                 return;
             }
             // 判断通知类型
-            switch (msg.what){
+            switch (msg.what) {
                 // 搜索输入的内容
-                case NotifyConstants.H_SEARCH_INPUT_CONTENT:
+                case Constants.Notify.H_SEARCH_INPUT_CONTENT:
                     try {
                         // 发送通知
-                        BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_SEARCH_INPUT_CONTENT, searchView.getQuery().toString());
-                    } catch (Exception e){
+                        BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_INPUT_CONTENT, searchView.getQuery().toString());
+                    } catch (Exception e) {
                     }
                     break;
             }
@@ -532,7 +533,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     /** 请求权限 */
-    private void requestPermission(){
+    private void requestPermission() {
         // 需要的权限
         String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         // 判断是否存在读写权限

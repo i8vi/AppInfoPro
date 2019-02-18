@@ -5,15 +5,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+import dev.lib.other.EventBusUtils;
 import dev.utils.app.SDCardUtils;
 import dev.utils.app.info.AppInfoBean;
 import dev.utils.app.info.AppInfoUtils;
 import dev.utils.app.logger.DevLogger;
 import dev.utils.common.DevCommonUtils;
 import dev.utils.common.FileUtils;
-import t.app.info.base.BaseApplication;
+import t.app.info.base.config.Constants;
+import t.app.info.base.event.QueryFileEvent;
 import t.app.info.beans.item.FileResItem;
-import t.app.info.utils.config.NotifyConstants;
 
 /**
  * detail: 搜索SD卡工具类
@@ -21,7 +22,7 @@ import t.app.info.utils.config.NotifyConstants;
  */
 public final class QuerySDCardUtils {
 
-    private QuerySDCardUtils(){
+    private QuerySDCardUtils() {
     }
 
     // 日志 TAG
@@ -33,7 +34,7 @@ public final class QuerySDCardUtils {
      * 单例获取数据
      * @return
      */
-    public static QuerySDCardUtils getInstance(){
+    public static QuerySDCardUtils getInstance() {
         return instance;
     }
 
@@ -47,10 +48,10 @@ public final class QuerySDCardUtils {
     private ArrayList<FileResItem> listFileResItems;
 
     /** 重置复位 */
-    public void reset(){
+    public void reset() {
         isQueryed = false;
         isQueryIng = false;
-        if (listFileResItems != null){
+        if (listFileResItems != null) {
             listFileResItems.clear();
         }
         listFileResItems = null;
@@ -59,14 +60,14 @@ public final class QuerySDCardUtils {
     /**
      * 查询 SDCard 资源文件
      */
-    public void querySDCardRes(){
-        if (isQueryed){
-            // 进行通知
-            BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_QUERY_FILE_RES_END_NOTIFY);
+    public void querySDCardRes() {
+        if (isQueryed) {
+            // 搜索结束
+            EventBusUtils.sendEvent(new QueryFileEvent(Constants.Notify.H_QUERY_FILE_RES_END_NOTIFY));
             return;
         }
-        // 进行通知
-        BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_QUERY_FILE_RES_ING_NOTIFY);
+        // 开始搜索/搜索中
+        EventBusUtils.sendEvent(new QueryFileEvent(Constants.Notify.H_QUERY_FILE_RES_ING_NOTIFY));
         // 初始化线程
         initQueryRunn();
         // 如果查询中则不处理
@@ -108,9 +109,9 @@ public final class QuerySDCardUtils {
      * 初始化查询资源线程
      * @return
      */
-    private Runnable initQueryRunn(){
-        if(querySDCardRun == null){
-            querySDCardRun = new Thread(){
+    private Runnable initQueryRunn() {
+        if(querySDCardRun == null) {
+            querySDCardRun = new Thread() {
                 @Override
                 public void run() {
                     try {
@@ -124,8 +125,8 @@ public final class QuerySDCardUtils {
                         isQueryIng = false;
                         // 进行排序
                         Collections.sort(listFileResItems, new ApkListsComparator());
-                        // 进行通知
-                        BaseApplication.sDevObservableNotify.onNotify(NotifyConstants.H_QUERY_FILE_RES_END_NOTIFY, result);
+                        // 搜索结束
+                        EventBusUtils.sendEvent(new QueryFileEvent(Constants.Notify.H_QUERY_FILE_RES_END_NOTIFY, result));
                     } catch (Exception e) {
                     }
                 }
@@ -143,8 +144,8 @@ public final class QuerySDCardUtils {
      * @param filterSuffixs 过滤的后缀
      * return 返回状态 -1 异常(无权限)， 0 无文件，1 查询成功, -2 过滤条件为null
      */
-    private int querySDCardRes(String bPath, ArrayList<FileResItem> listRes, String[] filterSuffixs){
-        if (filterSuffixs == null){
+    private int querySDCardRes(String bPath, ArrayList<FileResItem> listRes, String[] filterSuffixs) {
+        if (filterSuffixs == null) {
             return -2;
         }
         int resultCode = 0;
@@ -153,12 +154,12 @@ public final class QuerySDCardUtils {
             listRes.clear();
             // 获取SDCard 根目录
             File file = new File(bPath);
-            if(file != null){
+            if(file != null) {
                 // 获取文件夹全部子文件
                 String[] filelist = file.list();
                 // 获取文件总数
                 int count = filelist.length;
-                if(count!=0){
+                if(count!=0) {
                     queryFile(bPath + File.separator, listRes, filterSuffixs);
                     resultCode = 1;
                 }
@@ -176,17 +177,17 @@ public final class QuerySDCardUtils {
      * @param listRes 数据源
      * @param filterSuffixs 过滤的后缀
      */
-    private void queryFile(String filePath, ArrayList<FileResItem> listRes, String[] filterSuffixs){
+    private void queryFile(String filePath, ArrayList<FileResItem> listRes, String[] filterSuffixs) {
         try {
             File file = new File(filePath);
-            if(file != null){
+            if(file != null) {
                 // 获取文件夹全部子文件
                 String[] filelist = file.list();
                 // 获取文件总数
                 int count = filelist.length;
                 // 共用实体类
                 FileResItem fileResItem;
-                if(count!=0){
+                if(count!=0) {
                     for (int i = 0; i < count; i++) {
                         // 路径加上文件名
                         File readfile = new File(filePath + filelist[i]);
@@ -197,7 +198,7 @@ public final class QuerySDCardUtils {
                         } else {
                             // 属于文件
                             fileResItem = getFileToFileResItem(readfile, filterSuffixs);
-                            if(fileResItem != null){
+                            if(fileResItem != null) {
                                 listRes.add(fileResItem);
                             }
                         }
@@ -215,19 +216,19 @@ public final class QuerySDCardUtils {
      * @param filterSuffixs 过滤的后缀
      * @return
      */
-    private FileResItem getFileToFileResItem(File file, String[] filterSuffixs){
+    private FileResItem getFileToFileResItem(File file, String[] filterSuffixs) {
         try {
             // 文件不等于null,并且存在该文件
-            if(file != null && file.exists()){
+            if(file != null && file.exists()) {
                 String fName = file.getName(); // 文件名
                 String fPath = file.getPath(); // 完整路径 file.getAbsolutePath()
 //                String fPrefix = FileUtils.getFileNotSuffix(fName); // 获取文件前缀
 //                String fSuffix = FileUtils.getFileSuffix(fName); // 获取文件后缀
                 // 判断是否符合结尾
-                if (DevCommonUtils.isEndsWith(true, fName, filterSuffixs)){
+                if (DevCommonUtils.isEndsWith(true, fName, filterSuffixs)) {
                     // 获取App信息
                     AppInfoBean appInfoBean = AppInfoUtils.getAppInfoBeanToPath(fPath);
-                    if (appInfoBean != null){
+                    if (appInfoBean != null) {
                         // 初始化实体类
                         return new FileResItem(appInfoBean, file, fName, fPath, FileUtils.getFileMD5ToString(file));
                     }
@@ -246,8 +247,8 @@ public final class QuerySDCardUtils {
     private static class ApkListsComparator implements Comparator<FileResItem> {
 
         public final int compare(FileResItem a, FileResItem b) {
-            if (a != null && b != null){
-                if (a.getLastModified() == b.getLastModified()){
+            if (a != null && b != null) {
+                if (a.getLastModified() == b.getLastModified()) {
                     return 0; // 安装时间相等
                 } else { //
                     return a.getLastModified() > b.getLastModified() ? -1 : 1; // 近期安装的在最前面
