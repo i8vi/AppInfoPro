@@ -20,15 +20,18 @@ import dev.utils.app.DeviceUtils;
 import dev.utils.app.ScreenUtils;
 import dev.utils.app.SizeUtils;
 import dev.utils.app.assist.manager.ActivityManager;
+import dev.utils.app.logger.DevLogger;
 import dev.utils.app.toast.ToastTintUtils;
 import dev.utils.common.FileUtils;
 import t.app.info.R;
+import t.app.info.activitys.MainActivity;
 import t.app.info.adapters.DeviceInfoAdapter;
 import t.app.info.base.BaseFragment;
 import t.app.info.base.config.Constants;
 import t.app.info.base.config.ProConstants;
 import t.app.info.base.event.ExportEvent;
 import t.app.info.beans.DeviceInfoBean;
+import t.app.info.beans.TypeEnum;
 import t.app.info.beans.item.DeviceInfoItem;
 
 /**
@@ -257,12 +260,15 @@ public class ScreenInfoFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onExportEvent(ExportEvent event) {
+        DevLogger.dTag(TAG, "onExportEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code){
                 case Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY:
-                    // 发送通知
-                    vHandler.sendEmptyMessage(code);
+                    if (MainActivity.getTypeEnum() == TypeEnum.SCREEN_INFO) {
+                        // 发送通知
+                        vHandler.sendEmptyMessage(code);
+                    }
                     break;
             }
         }

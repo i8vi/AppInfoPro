@@ -2,7 +2,6 @@ package t.app.info.activitys;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,7 +10,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +39,7 @@ import dev.utils.app.logger.DevLogger;
 import dev.utils.app.toast.ToastTintUtils;
 import dev.utils.common.FileUtils;
 import t.app.info.R;
+import t.app.info.base.BaseActivity;
 import t.app.info.base.config.Constants;
 import t.app.info.base.config.ProConstants;
 import t.app.info.base.event.AppUninstallEvent;
@@ -52,12 +51,8 @@ import t.app.info.utils.ProUtils;
  * detail: App 详情页面(已安装)
  * Created by Ttt
  */
-public class AppDetailsActivity extends AppCompatActivity implements View.OnClickListener {
+public class AppDetailsActivity extends BaseActivity implements View.OnClickListener {
 
-    // 日志 TAG
-    private final String TAG = AppDetailsActivity.class.getSimpleName();
-    // 上下文
-    private Context mContext;
     // app 信息 Item
     private AppInfoItem appInfoItem;
     // ==== View ====
@@ -168,8 +163,9 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    /** 初始化事件 */
-    private void initListeners() {
+    @Override // 初始化事件
+    protected void initListeners() {
+        super.initListeners();
         // 打开应用
         aad_openapp_tv.setOnClickListener(this);
         // 卸载应用
@@ -424,6 +420,7 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onExportEvent(ExportEvent event) {
+        DevLogger.dTag(TAG, "onExportEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code) {

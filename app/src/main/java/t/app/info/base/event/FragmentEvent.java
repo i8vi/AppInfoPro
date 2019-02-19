@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class FragmentEvent extends DevBaseEvent<Integer> {
 
-    public FragmentEvent() {
-        super();
-    }
-
     public FragmentEvent(int code) {
         super(code);
     }

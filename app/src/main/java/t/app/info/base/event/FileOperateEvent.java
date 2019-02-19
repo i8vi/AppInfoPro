@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class FileOperateEvent extends DevBaseEvent<String> {
 
-    public FileOperateEvent() {
-        super();
-    }
-
     public FileOperateEvent(int code) {
         super(code);
     }

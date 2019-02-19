@@ -24,15 +24,18 @@ import dev.utils.app.MemoryUtils;
 import dev.utils.app.SDCardUtils;
 import dev.utils.app.ScreenUtils;
 import dev.utils.app.assist.manager.ActivityManager;
+import dev.utils.app.logger.DevLogger;
 import dev.utils.app.toast.ToastTintUtils;
 import dev.utils.common.FileUtils;
 import t.app.info.R;
+import t.app.info.activitys.MainActivity;
 import t.app.info.adapters.DeviceInfoAdapter;
 import t.app.info.base.BaseFragment;
 import t.app.info.base.config.Constants;
 import t.app.info.base.config.ProConstants;
 import t.app.info.base.event.ExportEvent;
 import t.app.info.beans.DeviceInfoBean;
+import t.app.info.beans.TypeEnum;
 import t.app.info.beans.item.DeviceInfoItem;
 
 /**
@@ -312,7 +315,6 @@ public class DeviceInfoFragment extends BaseFragment {
         mListDeviceInfos.add(new DeviceInfoItem(R.string.cpu_min, CPUUtils.getMinCpuFreq() + ""));
         // 获取 CPU 当前 HZ
         mListDeviceInfos.add(new DeviceInfoItem(R.string.cpu_cur, CPUUtils.getCurCpuFreq() + ""));
-
         // 发送通知
         vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_DEVICE_INFO_END_NOTIFY);
     }
@@ -321,12 +323,15 @@ public class DeviceInfoFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onExportEvent(ExportEvent event) {
+        DevLogger.dTag(TAG, "onExportEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code){
                 case Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY:
-                    // 发送通知
-                    vHandler.sendEmptyMessage(code);
+                    if (MainActivity.getTypeEnum() == TypeEnum.DEVICE_INFO) {
+                        // 发送通知
+                        vHandler.sendEmptyMessage(code);
+                    }
                     break;
             }
         }

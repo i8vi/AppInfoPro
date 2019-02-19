@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class AppUninstallEvent extends DevBaseEvent<String> {
 
-    public AppUninstallEvent() {
-        super();
-    }
-
     public AppUninstallEvent(int code) {
         super(code);
     }

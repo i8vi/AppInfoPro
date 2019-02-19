@@ -139,6 +139,7 @@ public class BaseActivity extends DevBaseActivity {
     // 默认非粘性
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onEventBus(DevBaseEvent<?> event) {
+        DevLogger.dTag(TAG, "onEventBus");
         if (event != null) {
             receiveEvent(event);
         }

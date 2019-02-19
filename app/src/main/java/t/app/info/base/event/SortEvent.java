@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class SortEvent extends DevBaseEvent<String> {
 
-    public SortEvent() {
-        super();
-    }
-
     public SortEvent(int code) {
         super(code);
     }

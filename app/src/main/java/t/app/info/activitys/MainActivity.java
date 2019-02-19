@@ -38,6 +38,7 @@ import t.app.info.base.config.Constants;
 import t.app.info.base.event.ExportEvent;
 import t.app.info.base.event.FragmentEvent;
 import t.app.info.base.event.SearchEvent;
+import t.app.info.beans.TypeEnum;
 import t.app.info.fragments.AppListFragment;
 import t.app.info.fragments.DeviceInfoFragment;
 import t.app.info.fragments.QueryApkFragment;
@@ -319,11 +320,25 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 获取当前 Menu 索引
+     * 判断是否对应的类型
      * @return
      */
-    public static int getMenuPos() {
-        return mMenuPos;
+    public static TypeEnum getTypeEnum(){
+        switch (mMenuPos) {
+            case 0: // 我的应用
+                return TypeEnum.APP_USER;
+            case 1: // 系统应用
+                return TypeEnum.APP_SYSTEM;
+            case 2: // 手机信息
+                return TypeEnum.DEVICE_INFO;
+            case 3: // 屏幕信息
+                return TypeEnum.SCREEN_INFO;
+            case 4: // 扫描APK
+                return TypeEnum.QUERY_APK;
+            case 5: // 设置
+                return TypeEnum.SETTING;
+        }
+        return TypeEnum.NONE;
     }
 
     // == Menu ==

@@ -281,18 +281,25 @@ public class AppListFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onFragmentEvent(FragmentEvent event) {
+        DevLogger.dTag(TAG, "onFragmentEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code){
+                case Constants.Notify.H_TOGGLE_FRAGMENT_NOTIFY:
+                    // 合并表示不属于搜索
+                    isSearch = false;
+                    // 清空数据
+                    listSearchs.clear();
+                    break;
                 case Constants.Notify.H_REFRESH_NOTIFY:
                     // 获取类型
                     AppInfoBean.AppType refType = AppInfoBean.AppType.ALL;
                     // 根据索引判断
-                    switch (MainActivity.getMenuPos()) {
-                        case 0:
+                    switch (MainActivity.getTypeEnum()) {
+                        case APP_USER:
                             refType = AppInfoBean.AppType.USER;
                             break;
-                        case 1:
+                        case APP_SYSTEM:
                             refType = AppInfoBean.AppType.SYSTEM;
                             break;
                     }
@@ -303,18 +310,13 @@ public class AppListFragment extends BaseFragment {
                         vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY);
                     }
                     break;
-                case Constants.Notify.H_TOGGLE_FRAGMENT_NOTIFY:
-                    // 合并表示不属于搜索
-                    isSearch = false;
-                    // 清空数据
-                    listSearchs.clear();
-                    break;
             }
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onQueryAppEvent(QueryAppEvent event) {
+        DevLogger.dTag(TAG, "onQueryAppEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code) {
@@ -328,6 +330,7 @@ public class AppListFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onAppUninstallEvent(AppUninstallEvent event) {
+        DevLogger.dTag(TAG, "onAppUninstallEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code) {
@@ -365,53 +368,54 @@ public class AppListFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onSearchEvent(SearchEvent event) {
-        if (event != null) {
-            int code = event.getCode();
-            switch (code) {
-                /** 搜索合并通知 */
-                case Constants.Notify.H_SEARCH_COLLAPSE:
-                    // 合并表示不属于搜索
-                    isSearch = false;
-                    // 发送通知
-                    vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY);
-                    break;
-                /** 搜索展开通知 */
-                case Constants.Notify.H_SEARCH_EXPAND:
-                    // 展开表示属于搜索
-                    isSearch = true;
-                    // 删除旧的数据
-                    listSearchs.clear();
-                    break;
-                /** 搜索输入内容通知 */
-                case Constants.Notify.H_SEARCH_INPUT_CONTENT:
-                    // 获取类型
-                    AppInfoBean.AppType notifyType = AppInfoBean.AppType.ALL;
-                    // 根据索引判断
-                    switch (MainActivity.getMenuPos()) {
-                        case 0:
-                            notifyType = AppInfoBean.AppType.USER;
-                            break;
-                        case 1:
-                            notifyType = AppInfoBean.AppType.SYSTEM;
-                            break;
-                    }
-                    // 类型相同才处理
-                    if (mAppType != null && mAppType == notifyType) {
-                        try {
-                            // 删除旧的数据
-                            listSearchs.clear();
-                            // 进行筛选处理
-                            filterAppList(ProUtils.getAppLists(mAppType), listSearchs, event.getData());
-                        } catch (Exception e) {
-                            DevLogger.eTag(TAG, e, "Constants.Notify.H_SEARCH_INPUT_CONTENT");
-                        }
-                        Message msg = new Message();
-                        msg.what = Constants.Notify.H_QUERY_APPLIST_END_NOTIFY;
-                        msg.obj = event.getData();
+        DevLogger.dTag(TAG, "onSearchEvent");
+        // 获取类型
+        AppInfoBean.AppType notifyType = AppInfoBean.AppType.ALL;
+        // 根据索引判断
+        switch (MainActivity.getTypeEnum()) {
+            case APP_USER:
+                notifyType = AppInfoBean.AppType.USER;
+                break;
+            case APP_SYSTEM:
+                notifyType = AppInfoBean.AppType.SYSTEM;
+                break;
+        }
+        // 类型相同才处理
+        if (mAppType != null && mAppType == notifyType) {
+            if (event != null) {
+                int code = event.getCode();
+                switch (code) {
+                    /** 搜索合并通知 */
+                    case Constants.Notify.H_SEARCH_COLLAPSE:
+                        // 合并表示不属于搜索
+                        isSearch = false;
                         // 发送通知
-                        vHandler.sendMessage(msg);
-                    }
-                    break;
+                        vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY);
+                        break;
+                    /** 搜索展开通知 */
+                    case Constants.Notify.H_SEARCH_EXPAND:
+                        // 展开表示属于搜索
+                        isSearch = true;
+                        // 删除旧的数据
+                        listSearchs.clear();
+                        break;
+                    /** 搜索输入内容通知 */
+                    case Constants.Notify.H_SEARCH_INPUT_CONTENT:
+                            try {
+                                // 删除旧的数据
+                                listSearchs.clear();
+                                // 进行筛选处理
+                                filterAppList(ProUtils.getAppLists(mAppType), listSearchs, event.getData());
+                            } catch (Exception e) {
+                                DevLogger.eTag(TAG, e, "Constants.Notify.H_SEARCH_INPUT_CONTENT");
+                            }
+                            Message msg = new Message();
+                            msg.what = Constants.Notify.H_QUERY_APPLIST_END_NOTIFY;
+                            msg.obj = event.getData();
+                            // 发送通知
+                            vHandler.sendMessage(msg);
+                        break;
+                }
             }
         }
     }

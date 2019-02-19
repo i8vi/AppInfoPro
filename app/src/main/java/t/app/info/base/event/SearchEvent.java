@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class SearchEvent extends DevBaseEvent<String> {
 
-    public SearchEvent() {
-        super();
-    }
-
     public SearchEvent(int code) {
         super(code);
     }

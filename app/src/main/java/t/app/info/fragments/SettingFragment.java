@@ -15,6 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import dev.utils.app.AppUtils;
 import dev.utils.app.assist.manager.ActivityManager;
+import dev.utils.app.logger.DevLogger;
 import dev.utils.app.share.SharedUtils;
 import dev.utils.app.toast.ToastTintUtils;
 import t.app.info.R;
@@ -217,6 +218,7 @@ public class SettingFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onSortEvent(SortEvent event) {
+        DevLogger.dTag(TAG, "onSortEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code) {

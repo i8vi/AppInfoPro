@@ -30,6 +30,7 @@ import t.app.info.base.event.FileOperateEvent;
 import t.app.info.base.event.FragmentEvent;
 import t.app.info.base.event.QueryFileEvent;
 import t.app.info.base.event.SearchEvent;
+import t.app.info.beans.TypeEnum;
 import t.app.info.beans.item.FileResItem;
 import t.app.info.utils.QuerySDCardUtils;
 import t.app.info.widgets.StateLayout;
@@ -284,6 +285,7 @@ public class QueryApkFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onFragmentEvent(FragmentEvent event) {
+        DevLogger.dTag(TAG, "onFragmentEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code){
@@ -296,7 +298,7 @@ public class QueryApkFragment extends BaseFragment {
                     break;
                 case Constants.Notify.H_REFRESH_NOTIFY:
                     // 类型相同才处理
-                    if (MainActivity.getMenuPos() == 3) {
+                    if (MainActivity.getTypeEnum() == TypeEnum.QUERY_APK) {
                         // 设置空的数据
                         vHandler.sendEmptyMessage(Constants.Notify.H_REFRESH_NOTIFY);
                         // 查询文件
@@ -309,6 +311,7 @@ public class QueryApkFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onFileOperateEvent(FileOperateEvent event) {
+        DevLogger.dTag(TAG, "onFileOperateEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code){
@@ -342,6 +345,7 @@ public class QueryApkFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onQueryFileEvent(QueryFileEvent event) {
+        DevLogger.dTag(TAG, "onQueryFileEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code){
@@ -365,6 +369,11 @@ public class QueryApkFragment extends BaseFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onSearchEvent(SearchEvent event) {
+        DevLogger.dTag(TAG, "onSearchEvent");
+        // 不属于搜索 APK 直接跳过
+        if (MainActivity.getTypeEnum() != TypeEnum.QUERY_APK){
+            return;
+        }
         if (event != null) {
             int code = event.getCode();
             switch (code) {
@@ -385,7 +394,7 @@ public class QueryApkFragment extends BaseFragment {
                 /** 搜索输入内容通知 */
                 case Constants.Notify.H_SEARCH_INPUT_CONTENT:
                     // 类型相同才处理
-                    if (MainActivity.getMenuPos() == 3) {
+                    if (MainActivity.getTypeEnum() == TypeEnum.QUERY_APK) {
                         try {
                             // 删除旧的数据
                             listSearchs.clear();

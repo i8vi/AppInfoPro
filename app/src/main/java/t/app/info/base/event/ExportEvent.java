@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class ExportEvent extends DevBaseEvent<String> {
 
-    public ExportEvent() {
-        super();
-    }
-
     public ExportEvent(int code) {
         super(code);
     }

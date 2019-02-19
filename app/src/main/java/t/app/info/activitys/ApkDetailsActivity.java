@@ -1,7 +1,6 @@
 package t.app.info.activitys;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -11,7 +10,6 @@ import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +39,7 @@ import dev.utils.app.logger.DevLogger;
 import dev.utils.app.toast.ToastTintUtils;
 import dev.utils.common.FileUtils;
 import t.app.info.R;
+import t.app.info.base.BaseActivity;
 import t.app.info.base.config.Constants;
 import t.app.info.base.config.ProConstants;
 import t.app.info.base.event.ExportEvent;
@@ -51,12 +50,8 @@ import t.app.info.utils.ProUtils;
  * detail: Apk 详情页面
  * Created by Ttt
  */
-public class ApkDetailsActivity extends AppCompatActivity implements View.OnClickListener {
+public class ApkDetailsActivity extends BaseActivity implements View.OnClickListener {
 
-    // 日志 TAG
-    private final String TAG = ApkDetailsActivity.class.getSimpleName();
-    // 上下文
-    private Context mContext;
     // apk 信息 Item
     private ApkInfoItem apkInfoItem;
     // ==== View ====
@@ -185,8 +180,9 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    /** 初始化事件 */
-    private void initListeners() {
+    @Override // 初始化事件
+    protected void initListeners() {
+        super.initListeners();
         // 安装应用
         apd_install_apk_tv.setOnClickListener(this);
         // 删除apk文件
@@ -342,6 +338,7 @@ public class ApkDetailsActivity extends AppCompatActivity implements View.OnClic
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public final void onExportEvent(ExportEvent event) {
+        DevLogger.dTag(TAG, "onExportEvent");
         if (event != null) {
             int code = event.getCode();
             switch (code){

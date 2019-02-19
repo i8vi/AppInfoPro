@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class QueryFileEvent extends DevBaseEvent<Integer> {
 
-    public QueryFileEvent() {
-        super();
-    }
-
     public QueryFileEvent(int code) {
         super(code);
     }

@@ -8,10 +8,6 @@ import dev.base.lib.DevBaseEvent;
  */
 public class QueryAppEvent extends DevBaseEvent<String> {
 
-    public QueryAppEvent() {
-        super();
-    }
-
     public QueryAppEvent(int code) {
         super(code);
     }
