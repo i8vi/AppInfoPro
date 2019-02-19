@@ -11,6 +11,7 @@ import butterknife.Unbinder;
 import dev.base.DevBaseActivity;
 import dev.base.lib.DevBaseEvent;
 import dev.lib.other.EventBusUtils;
+import dev.utils.app.logger.DevLogger;
 
 /**
  * detail: 基类
@@ -104,6 +105,15 @@ public class BaseActivity extends DevBaseActivity {
     // = Event 处理 =
 
     /**
+     * 是否注册 Event 事件通知
+     * @return
+     */
+    @Override
+    protected boolean isRegisterEvent() {
+        return true;
+    }
+
+    /**
      * 注册 Event 操作
      * @param isRegister
      */
@@ -112,10 +122,14 @@ public class BaseActivity extends DevBaseActivity {
         super.registerEventOperate(isRegister);
 
         if (isRegisterEvent()) {
-            if (isRegister) {
-                EventBusUtils.register(this);
-            } else {
-                EventBusUtils.unregister(this);
+            try {
+                if (isRegister) {
+                    EventBusUtils.register(this);
+                } else {
+                    EventBusUtils.unregister(this);
+                }
+            } catch (Exception e) {
+                DevLogger.eTag(TAG, e, "registerEventOperate");
             }
         }
     }
@@ -124,7 +138,7 @@ public class BaseActivity extends DevBaseActivity {
 
     // 默认非粘性
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public final void onEventBus(DevBaseEvent event) {
+    public final void onEventBus(DevBaseEvent<?> event) {
         if (event != null) {
             receiveEvent(event);
         }

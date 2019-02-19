@@ -62,11 +62,11 @@ public final class QuerySDCardUtils {
      */
     public void querySDCardRes() {
         if (isQueryed) {
-            // 搜索结束
+            // 发送搜索文件资源结束通知事件
             EventBusUtils.sendEvent(new QueryFileEvent(Constants.Notify.H_QUERY_FILE_RES_END_NOTIFY));
             return;
         }
-        // 开始搜索/搜索中
+        // 发送搜索文件资源中通知事件
         EventBusUtils.sendEvent(new QueryFileEvent(Constants.Notify.H_QUERY_FILE_RES_ING_NOTIFY));
         // 初始化线程
         initQueryRunn();
@@ -125,7 +125,7 @@ public final class QuerySDCardUtils {
                         isQueryIng = false;
                         // 进行排序
                         Collections.sort(listFileResItems, new ApkListsComparator());
-                        // 搜索结束
+                        // 发送搜索文件资源结束通知事件
                         EventBusUtils.sendEvent(new QueryFileEvent(Constants.Notify.H_QUERY_FILE_RES_END_NOTIFY, result));
                     } catch (Exception e) {
                     }

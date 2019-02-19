@@ -37,8 +37,8 @@
     <string name="phone_info">手机信息</string>
     <string name="screen_info">屏幕信息</string>
     <string name="query_apk">扫描APK</string>
-    <string name="get_appinfo_fail">获取App 信息失败</string>
-    <string name="get_apkinfo_fail">获取apk 信息失败</string>
+    <string name="get_appinfo_fail">获取 APP 信息失败</string>
+    <string name="get_apkinfo_fail">获取 APK 信息失败</string>
     <string name="input_packname_aname_query">输入包名/应用名查找</string>
     <string name="search_noresult_tips">没有找到与 %s 相关的结果</string>
 

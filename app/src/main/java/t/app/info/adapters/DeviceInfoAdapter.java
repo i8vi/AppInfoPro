@@ -107,7 +107,7 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<DeviceInfoAdapter.Vi
                 // 复制到剪切板
                 ClipboardUtils.copyText(txt);
                 // 进行提示
-                ToastTintUtils.success(mActivity.getString(R.string.copy_suc) + " -> " + txt);
+                ToastTintUtils.success(AppUtils.getString(R.string.copy_suc) + " -> " + txt);
             }
         }
     }

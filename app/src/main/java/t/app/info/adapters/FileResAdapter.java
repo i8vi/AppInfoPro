@@ -119,7 +119,7 @@ public class FileResAdapter extends RecyclerView.Adapter<FileResAdapter.ViewHold
                     intent.putExtra(Constants.Key.KEY_APK_URI, fileResItem.getUri());
                     mActivity.startActivityForResult(intent, Constants.RequestCode.FOR_R_APP_DETAILS);
                 } else {
-                    ToastTintUtils.error(AppUtils.getString(R.string.file_not_exist));
+                    ToastTintUtils.warning(AppUtils.getString(R.string.file_not_exist));
                 }
             }
         }

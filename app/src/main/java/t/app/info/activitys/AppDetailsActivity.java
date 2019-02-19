@@ -21,11 +21,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import dev.DevUtils;
+import dev.lib.other.EventBusUtils;
 import dev.utils.app.AppUtils;
 import dev.utils.app.ClipboardUtils;
 import dev.utils.app.PermissionUtils;
@@ -35,13 +38,13 @@ import dev.utils.app.info.AppInfoItem;
 import dev.utils.app.info.AppInfoUtils;
 import dev.utils.app.info.KeyValueBean;
 import dev.utils.app.logger.DevLogger;
-import dev.utils.app.toast.ToastUtils;
+import dev.utils.app.toast.ToastTintUtils;
 import dev.utils.common.FileUtils;
 import t.app.info.R;
-import t.app.info.base.BaseApplication;
 import t.app.info.base.config.Constants;
 import t.app.info.base.config.ProConstants;
-import t.app.info.base.observer.DevObserverNotify;
+import t.app.info.base.event.AppUninstallEvent;
+import t.app.info.base.event.ExportEvent;
 import t.app.info.beans.item.ViewHolderItem;
 import t.app.info.utils.ProUtils;
 
@@ -94,8 +97,8 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
         try {
             // 判断是否安装 app
             if (!AppUtils.isInstalledApp(appInfoItem.getAppInfoBean().getAppPackName())) {
-                // 进行通知
-                BaseApplication.sDevObservableNotify.onNotify(Constants.RequestCode.FOR_R_APP_UNINSTALL, appInfoItem.getAppInfoBean().getAppPackName());
+                // 发送 App 卸载通知事件
+                EventBusUtils.sendEvent(new AppUninstallEvent(Constants.RequestCode.FOR_R_APP_UNINSTALL, appInfoItem.getAppInfoBean().getAppPackName()));
                 // -
                 Intent intent = new Intent();
                 intent.putExtra(Constants.Key.KEY_PACKNAME, appInfoItem.getAppInfoBean().getAppPackName());
@@ -109,8 +112,6 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // 注销观察者模式
-        BaseApplication.sDevObservableNotify.unregisterObserver(this);
     }
 
     @Override
@@ -148,7 +149,7 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
         }
         if (appInfoItem == null) {
             // 提示获取失败
-            ToastUtils.showShort(mContext, R.string.get_appinfo_fail);
+            ToastTintUtils.warning(AppUtils.getString(R.string.get_appinfo_fail));
             finish(); // 销毁页面
             return;
         }
@@ -179,22 +180,6 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
             public void onClick(View v) {
                 // 关闭页面
                 finish();
-            }
-        });
-        // 注册观察者模式
-        BaseApplication.sDevObservableNotify.registerObserver(this, new DevObserverNotify(this) {
-            @Override
-            public void onNotify(int nType, Object... args) {
-                switch (nType) {
-                    case Constants.Notify.H_EXPORT_APP_MSG_NOTIFY:
-                        // 发送通知
-                        vHandler.sendEmptyMessage(nType);
-                        break;
-                    case Constants.Notify.H_EXPORT_APP_NOTIFY:
-                        // 发送通知
-                        vHandler.sendEmptyMessage(nType);
-                        break;
-                }
             }
         });
     }
@@ -231,11 +216,15 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
                         tips += " " + ProConstants.EXPORT_APP_MSG_PATH + fileName;
                     }
                     // 提示结果
-                    ToastUtils.showShort(mContext, tips);
+                    if (result){
+                        ToastTintUtils.success(tips);
+                    } else {
+                        ToastTintUtils.error(tips);
+                    }
                     break;
                 case Constants.Notify.H_EXPORT_APP_NOTIFY: // 导出apk安装包
                     // 提示导出中
-                    ToastUtils.showShort(mContext, R.string.export_ing);
+                    ToastTintUtils.normal(AppUtils.getString(R.string.export_ing));
                     // 后台线程导出
                     new Thread(new Runnable() {
                         @Override
@@ -253,14 +242,12 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
                             }
                             // 进行提示
                             final String resultTips = tips;
-                            // 进行提示
-                            DevUtils.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // 提示结果
-                                    ToastUtils.showShort(mContext, resultTips);
-                                }
-                            });
+                            // 提示结果
+                            if (result){
+                                ToastTintUtils.success(resultTips);
+                            } else {
+                                ToastTintUtils.error(resultTips);
+                            }
                         }
                     }).start();
                     break;
@@ -303,9 +290,9 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
             // 初始化数据源
             View itemView = inflater.inflate(R.layout.item_app_details, null, false);
             // 初始化View
-            LinearLayout iad_linear = (LinearLayout) itemView.findViewById(R.id.iad_linear);
-            TextView iad_key_tv = (TextView) itemView.findViewById(R.id.iad_key_tv);
-            TextView iad_value_tv = (TextView) itemView.findViewById(R.id.iad_value_tv);
+            LinearLayout iad_linear = itemView.findViewById(R.id.iad_linear);
+            TextView iad_key_tv = itemView.findViewById(R.id.iad_key_tv);
+            TextView iad_value_tv = itemView.findViewById(R.id.iad_value_tv);
             // 设置值
             iad_key_tv.setText(keyValueBean.getKey());
             iad_value_tv.setText(keyValueBean.getValue());
@@ -318,7 +305,7 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
                     // 复制到剪切板
                     ClipboardUtils.copyText(txt);
                     // 进行提示
-                    ToastUtils.showShort(mContext, mContext.getString(R.string.copy_suc) + " -> " + txt);
+                    ToastTintUtils.success(AppUtils.getString(R.string.copy_suc) + " -> " + txt);
                 }
             });
             // 添加View
@@ -337,7 +324,7 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
                 // https://www.jianshu.com/p/a4a806567368
                 // --
                 if (!AppUtils.launchAppDetails(appInfoItem.getAppInfoBean().getAppPackName(), "")) {
-                    ToastUtils.showShort(mContext, R.string.operate_fail);
+                    ToastTintUtils.error(AppUtils.getString(R.string.operate_fail));
                 }
             }
         }).getItemView();
@@ -348,7 +335,7 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(View v) {
                 if (!AppUtils.launchAppDetailsSettings(appInfoItem.getAppInfoBean().getAppPackName())) {
-                    ToastUtils.showShort(mContext, R.string.operate_fail);
+                    ToastTintUtils.error(AppUtils.getString(R.string.operate_fail));
                 }
             }
         }).getItemView();
@@ -373,20 +360,20 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
             case R.id.bmai_export_app_msg: // 导出App信息
                 // 判断是否存在读写权限
                 if(ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-                    // 发出通知
-                    BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_APP_MSG_NOTIFY);
+                    // 发出导出 APP 信息通知事件
+                    EventBusUtils.sendEvent(new ExportEvent(Constants.Notify.H_EXPORT_APP_MSG_NOTIFY));
                 } else {
                     PermissionUtils.permission(permission).callBack(new PermissionUtils.PermissionCallBack() {
                         @Override
                         public void onGranted(PermissionUtils permissionUtils) {
-                            // 发出通知
-                            BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_APP_MSG_NOTIFY);
+                            // 发出导出 APP 信息通知事件
+                            EventBusUtils.sendEvent(new ExportEvent(Constants.Notify.H_EXPORT_APP_MSG_NOTIFY));
                         }
 
                         @Override
                         public void onDenied(PermissionUtils permissionUtils) {
                             // 提示导出失败
-                            ToastUtils.showShort(mContext, R.string.export_fail);
+                            ToastTintUtils.error(AppUtils.getString(R.string.export_fail));
                         }
                     }).request();
                 }
@@ -394,20 +381,20 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
             case R.id.bmai_export_app: // 导出apk 安装包// 需要的权限
                 // 判断是否存在读写权限
                 if(ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-                    // 发出通知
-                    BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_APP_NOTIFY);
+                    // 发出导出应用 APK 安装包通知事件
+                    EventBusUtils.sendEvent(new ExportEvent(Constants.Notify.H_EXPORT_APP_NOTIFY));
                 } else {
                     PermissionUtils.permission(permission).callBack(new PermissionUtils.PermissionCallBack() {
                         @Override
                         public void onGranted(PermissionUtils permissionUtils) {
-                            // 发出通知
-                            BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_APP_NOTIFY);
+                            // 发出导出应用 APK 安装包通知事件
+                            EventBusUtils.sendEvent(new ExportEvent(Constants.Notify.H_EXPORT_APP_NOTIFY));
                         }
 
                         @Override
                         public void onDenied(PermissionUtils permissionUtils) {
                             // 提示导出失败
-                            ToastUtils.showShort(mContext, R.string.export_fail);
+                            ToastTintUtils.error(AppUtils.getString(R.string.export_fail));
                         }
                     }).request();
                 }
@@ -426,10 +413,29 @@ public class AppDetailsActivity extends AppCompatActivity implements View.OnClic
                     // https://www.jianshu.com/p/8ba7f2f16af9
                     // file:///storage/emulated/0/photo.jpeg exposed beyond app through ClipData.Item.getUri
                     // 提示分享失败
-                    ToastUtils.showShort(mContext, R.string.share_fail);
+                    ToastTintUtils.error(AppUtils.getString(R.string.share_fail));
                 }
                 break;
         }
         return true;
+    }
+
+    // == 事件相关 ==
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public final void onExportEvent(ExportEvent event) {
+        if (event != null) {
+            int code = event.getCode();
+            switch (code) {
+                case Constants.Notify.H_EXPORT_APP_MSG_NOTIFY:
+                    // 处理导出 APP 信息操作
+                    vHandler.sendEmptyMessage(code);
+                    break;
+                case Constants.Notify.H_EXPORT_APP_NOTIFY:
+                    // 处理导出 APP 操作
+                    vHandler.sendEmptyMessage(code);
+                    break;
+            }
+        }
     }
 }

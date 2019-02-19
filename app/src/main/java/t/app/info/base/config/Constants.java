@@ -29,15 +29,15 @@ public final class Constants {
 
         int BASE = 1000;
 
-        /** 查询 App 列表结束通知 */
+        /** 查询 APP 列表结束通知 */
         int H_QUERY_APPLIST_END_NOTIFY = BASE + 1;
         /** 查询 手机参数 结束通知 */
         int H_QUERY_DEVICE_INFO_END_NOTIFY = BASE + 2;
         /** 导出设备信息通知 */
         int H_EXPORT_DEVICE_MSG_NOTIFY = BASE + 3;
-        /** 导出app信息通知 */
+        /** 导出 APP 信息通知 */
         int H_EXPORT_APP_MSG_NOTIFY = BASE + 4;
-        /** 导出应用apk安装包通知 */
+        /** 导出应用 APK 安装包通知 */
         int H_EXPORT_APP_NOTIFY = BASE + 5;
         /** 应用排序变更 */
         int H_APP_SORT_NOTIFY = BASE + 6;
@@ -47,15 +47,15 @@ public final class Constants {
         int H_SEARCH_EXPAND = BASE + 8;
         /** 搜索输入内容通知 */
         int H_SEARCH_INPUT_CONTENT = BASE + 9;
-        /** 切换Fragment 通知 */
+        /** 切换 Fragment 通知 */
         int H_TOGGLE_FRAGMENT_NOTIFY = BASE + 10;
-        /** 搜索文件资源结束 通知 */
+        /** 搜索文件资源结束通知 */
         int H_QUERY_FILE_RES_END_NOTIFY = BASE + 11;
-        /** 搜索文件资源中 通知 */
+        /** 搜索文件资源中通知 */
         int H_QUERY_FILE_RES_ING_NOTIFY = BASE + 12;
-        /** 刷新 通知 */
+        /** 刷新通知 */
         int H_REFRESH_NOTIFY = BASE + 13;
-        /** 删除文件 通知 */
+        /** 删除文件通知 */
         int H_DELETE_APK_FILE_NOTIFY = BASE + 14;
     }
 

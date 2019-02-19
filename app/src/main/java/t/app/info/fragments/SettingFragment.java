@@ -3,22 +3,24 @@ package t.app.info.fragments;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dev.utils.app.AppUtils;
 import dev.utils.app.assist.manager.ActivityManager;
 import dev.utils.app.share.SharedUtils;
-import dev.utils.app.toast.ToastUtils;
+import dev.utils.app.toast.ToastTintUtils;
 import t.app.info.R;
-import t.app.info.base.BaseApplication;
 import t.app.info.base.BaseFragment;
 import t.app.info.base.config.Constants;
-import t.app.info.base.observer.DevObserverNotify;
+import t.app.info.base.event.SortEvent;
 import t.app.info.dialogs.AppSortDialog;
 import t.app.info.dialogs.QuerySuffixDialog;
 import t.app.info.utils.ProUtils;
@@ -54,32 +56,25 @@ public class SettingFragment extends BaseFragment {
     // ==
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected int getLayoutId() {
+        return R.layout.fragment_setting;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if(rView != null) {
-            ViewGroup parent = (ViewGroup) rView.getParent();
-            // 删除以及在显示的View,防止切回来不加载,一边空白
-            if (parent != null) {
-                parent.removeView(rView);
-            }
-            return rView;
-        }
-        View view = inflater.inflate(R.layout.fragment_setting, container, false);
-        mContext = view.getContext();
-        // 保存View
-        rView = view;
+    protected void onInit(View view, ViewGroup container, Bundle savedInstanceState) {
         // 初始化View
-        ButterKnife.bind(this, view);
-        // ====
-        initViews();
-        initValues();
-        initListeners();
-        initOtherOperate();
-        return view;
+        unbinder = ButterKnife.bind(this, view);
+        // 注册 EventBus
+        registerEventOperate(true);
+        // 初始化方法
+        initMethod();
+    }
+
+    // ==
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -123,8 +118,6 @@ public class SettingFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // 注销观察者模式
-        BaseApplication.sDevObservableNotify.unregisterObserver(TAG);
     }
 
     @Override
@@ -152,18 +145,6 @@ public class SettingFragment extends BaseFragment {
     @Override
     public void initListeners() {
         super.initListeners();
-        // 注册观察者模式
-        BaseApplication.sDevObservableNotify.registerObserver(TAG, new DevObserverNotify(getActivity()) {
-            @Override
-            public void onNotify(int nType, Object... args) {
-                switch (nType) {
-                    case Constants.Notify.H_APP_SORT_NOTIFY:
-                        // 发送通知
-                        vHandler.sendEmptyMessage(nType);
-                        break;
-                }
-            }
-        });
         // 点击排序
         fs_appsort_linear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,7 +172,7 @@ public class SettingFragment extends BaseFragment {
                 // 通知刷新
                 vHandler.sendEmptyMessage(Constants.Notify.H_APP_SORT_NOTIFY);
                 // 进行提示
-                ToastUtils.showShort(mContext, R.string.reset_desetting_suc);
+                ToastTintUtils.success(AppUtils.getString(R.string.reset_desetting_suc));
             }
         });
     }
@@ -230,5 +211,20 @@ public class SettingFragment extends BaseFragment {
     private void selectAppSort() {
         // 更新文案
         fs_appsort_tv.setText(appSortArys[ProUtils.getAppSortType()]);
+    }
+
+    // == 事件相关 ==
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public final void onSortEvent(SortEvent event) {
+        if (event != null) {
+            int code = event.getCode();
+            switch (code) {
+                case Constants.Notify.H_APP_SORT_NOTIFY:
+                    // 发送通知
+                    vHandler.sendEmptyMessage(code);
+                    break;
+            }
+        }
     }
 }

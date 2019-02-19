@@ -133,7 +133,7 @@ public final class ProUtils {
         sMapAppInfos.put(AppInfoBean.AppType.USER, listUserApps);
         // 保存系统应用
         sMapAppInfos.put(AppInfoBean.AppType.SYSTEM, listSystemApps);
-        // 查询应用成功
+        // 发送查询 APP 列表结束通知事件
         EventBusUtils.sendEvent(new QueryAppEvent(Constants.Notify.H_QUERY_APPLIST_END_NOTIFY));
     }
 

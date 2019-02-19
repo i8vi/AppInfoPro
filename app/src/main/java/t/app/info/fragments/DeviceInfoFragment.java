@@ -7,9 +7,11 @@ import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,14 +24,14 @@ import dev.utils.app.MemoryUtils;
 import dev.utils.app.SDCardUtils;
 import dev.utils.app.ScreenUtils;
 import dev.utils.app.assist.manager.ActivityManager;
-import dev.utils.app.toast.ToastUtils;
+import dev.utils.app.toast.ToastTintUtils;
 import dev.utils.common.FileUtils;
 import t.app.info.R;
 import t.app.info.adapters.DeviceInfoAdapter;
-import t.app.info.base.BaseApplication;
 import t.app.info.base.BaseFragment;
 import t.app.info.base.config.Constants;
 import t.app.info.base.config.ProConstants;
+import t.app.info.base.event.ExportEvent;
 import t.app.info.beans.DeviceInfoBean;
 import t.app.info.beans.item.DeviceInfoItem;
 
@@ -59,32 +61,25 @@ public class DeviceInfoFragment extends BaseFragment {
     // ==
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected int getLayoutId() {
+        return R.layout.fragment_device_info;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if(rView != null) {
-            ViewGroup parent = (ViewGroup) rView.getParent();
-            // 删除以及在显示的View,防止切回来不加载,一边空白
-            if (parent != null) {
-                parent.removeView(rView);
-            }
-            return rView;
-        }
-        View view = inflater.inflate(R.layout.fragment_device_info, container, false);
-        mContext = view.getContext();
-        // 保存View
-        rView = view;
+    protected void onInit(View view, ViewGroup container, Bundle savedInstanceState) {
         // 初始化View
-        ButterKnife.bind(this, view);
-        // ====
-        initViews();
-        initValues();
-        initListeners();
-        initOtherOperate();
-        return view;
+        unbinder = ButterKnife.bind(this, view);
+        // 注册 EventBus
+        registerEventOperate(true);
+        // 初始化方法
+        initMethod();
+    }
+
+    // ==
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -136,8 +131,6 @@ public class DeviceInfoFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // 注销观察者模式
-        BaseApplication.sDevObservableNotify.unregisterObserver(TAG);
     }
 
     @Override
@@ -165,18 +158,6 @@ public class DeviceInfoFragment extends BaseFragment {
     @Override
     public void initListeners() {
         super.initListeners();
-        // 注册观察者模式
-        BaseApplication.sDevObservableNotify.registerObserver(TAG, new DevObserverNotify(getActivity()) {
-            @Override
-            public void onNotify(int nType, Object... args) {
-                switch (nType) {
-                    case Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY:
-                        // 发送通知
-                        vHandler.sendEmptyMessage(nType);
-                        break;
-                }
-            }
-        });
     }
 
     @Override
@@ -212,7 +193,11 @@ public class DeviceInfoFragment extends BaseFragment {
                         tips += " " + ProConstants.EXPORT_PATH + "deviceinfo.txt";
                     }
                     // 提示结果
-                    ToastUtils.showShort(mContext, tips);
+                    if (result){
+                        ToastTintUtils.success(tips);
+                    } else {
+                        ToastTintUtils.error(tips);
+                    }
                     break;
             }
         }
@@ -330,5 +315,20 @@ public class DeviceInfoFragment extends BaseFragment {
 
         // 发送通知
         vHandler.sendEmptyMessage(Constants.Notify.H_QUERY_DEVICE_INFO_END_NOTIFY);
+    }
+
+    // == 事件相关 ==
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public final void onExportEvent(ExportEvent event) {
+        if (event != null) {
+            int code = event.getCode();
+            switch (code){
+                case Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY:
+                    // 发送通知
+                    vHandler.sendEmptyMessage(code);
+                    break;
+            }
+        }
     }
 }

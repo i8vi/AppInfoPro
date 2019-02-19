@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import dev.lib.other.EventBusUtils;
 import dev.utils.app.AppUtils;
 import dev.utils.app.ClickUtils;
 import dev.utils.app.PermissionUtils;
@@ -32,9 +33,11 @@ import dev.utils.app.info.AppInfoBean;
 import dev.utils.app.toast.ToastTintUtils;
 import t.app.info.R;
 import t.app.info.base.BaseActivity;
-import t.app.info.base.BaseApplication;
 import t.app.info.base.BaseFragment;
 import t.app.info.base.config.Constants;
+import t.app.info.base.event.ExportEvent;
+import t.app.info.base.event.FragmentEvent;
+import t.app.info.base.event.SearchEvent;
 import t.app.info.fragments.AppListFragment;
 import t.app.info.fragments.DeviceInfoFragment;
 import t.app.info.fragments.QueryApkFragment;
@@ -311,8 +314,8 @@ public class MainActivity extends BaseActivity {
         }
         // 通知系统更新菜单
         supportInvalidateOptionsMenu();
-        // 发送通知
-        BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_TOGGLE_FRAGMENT_NOTIFY);
+        // 发送切换 Fragment 通知事件
+        EventBusUtils.sendEvent(new FragmentEvent(Constants.Notify.H_TOGGLE_FRAGMENT_NOTIFY));
     }
 
     /**
@@ -366,22 +369,22 @@ public class MainActivity extends BaseActivity {
                         QuerySDCardUtils.getInstance().reset();
                         break;
                 }
-                // 进行通知刷新
-                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_REFRESH_NOTIFY, mFragmentPos);
+                // 发送刷新通知事件
+                EventBusUtils.sendEvent(new FragmentEvent(Constants.Notify.H_REFRESH_NOTIFY, mFragmentPos));
                 break;
             case R.id.bmd_export_item: // 导出
                 // 需要的权限
                 String permission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
                 // 判断是否存在读写权限
                 if(ActivityCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
-                    // 发出通知
-                    BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY);
+                    // 发送导出设备信息通知事件
+                    EventBusUtils.sendEvent(new ExportEvent(Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY));
                 } else {
                     PermissionUtils.permission(permission).callBack(new PermissionUtils.PermissionCallBack() {
                         @Override
                         public void onGranted(PermissionUtils permissionUtils) {
-                            // 发出通知
-                            BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY);
+                            // 发送导出设备信息通知事件
+                            EventBusUtils.sendEvent(new ExportEvent(Constants.Notify.H_EXPORT_DEVICE_MSG_NOTIFY));
                         }
 
                         @Override
@@ -416,7 +419,7 @@ public class MainActivity extends BaseActivity {
 //        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
 //            @Override
 //            public boolean onMenuItemActionExpand(MenuItem item) { // 展开
-//                ToastUtils.showShort(mContext, "展开");
+//                ToastTintUtils.showShort(mContext, "展开");
 //                // 销毁搜索线程资源
 //                setSearchRunnStatus(true);
 //                // 发送通知
@@ -426,7 +429,7 @@ public class MainActivity extends BaseActivity {
 //
 //            @Override
 //            public boolean onMenuItemActionCollapse(MenuItem item) { // 合并
-//                ToastUtils.showShort(mContext, "合并");
+//                ToastTintUtils.showShort(mContext, "合并");
 //                // 销毁搜索线程资源
 //                setSearchRunnStatus(true);
 //                // 发送通知
@@ -440,8 +443,8 @@ public class MainActivity extends BaseActivity {
             public boolean onClose() {
                 // 销毁搜索线程资源
                 setSearchRunnStatus(true);
-                // 发送通知
-                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_COLLAPSE);
+                // 发送搜索合并通知事件
+                EventBusUtils.sendEvent(new SearchEvent(Constants.Notify.H_SEARCH_COLLAPSE));
                 return false;
             }
         });
@@ -451,8 +454,8 @@ public class MainActivity extends BaseActivity {
             public void onClick(View v) {
                 // 销毁搜索线程资源
                 setSearchRunnStatus(true);
-                // 发送通知
-                BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_EXPAND);
+                // 发送搜索展开通知事件
+                EventBusUtils.sendEvent(new SearchEvent(Constants.Notify.H_SEARCH_EXPAND));
             }
         });
         // 设置搜索文本监听
@@ -523,8 +526,8 @@ public class MainActivity extends BaseActivity {
                 // 搜索输入的内容
                 case Constants.Notify.H_SEARCH_INPUT_CONTENT:
                     try {
-                        // 发送通知
-                        BaseApplication.sDevObservableNotify.onNotify(Constants.Notify.H_SEARCH_INPUT_CONTENT, searchView.getQuery().toString());
+                        // 发送搜索输入内容通知事件
+                        EventBusUtils.sendEvent(new SearchEvent(Constants.Notify.H_SEARCH_INPUT_CONTENT, searchView.getQuery().toString()));
                     } catch (Exception e) {
                     }
                     break;
@@ -543,5 +546,4 @@ public class MainActivity extends BaseActivity {
             PermissionUtils.permission(permission).request();
         }
     }
-
 }

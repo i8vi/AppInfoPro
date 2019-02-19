@@ -106,7 +106,7 @@ public class AppSortDialog extends Dialog implements View.OnClickListener {
                     if (pos != sortPos) {
                         // 保存索引
                         SharedUtils.put(Constants.Key.KEY_APP_SORT, pos);
-                        // 排序变更通知
+                        // 发送应用排序变更通知事件
                         EventBusUtils.sendEvent(new SortEvent(Constants.Notify.H_APP_SORT_NOTIFY));
                     }
                     // 关闭
