@@ -1,6 +1,6 @@
 package t.app.info.base.event;
 
-import dev.base.lib.DevBaseEvent;
+import dev.base.DevBaseEvent;
 
 /**
  * detail: 排序通知事件

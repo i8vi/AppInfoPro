@@ -8,8 +8,8 @@ android {
         applicationId "t.app.info"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 14
-        versionName "1.4"
+        versionCode 15
+        versionName "1.5"
         multiDexEnabled true
     }
     buildTypes {
@@ -42,7 +42,7 @@ dependencies {
     // 加载动画效果
     implementation 'com.tt:whorlviewlibrary:1.0.3'
     // DevUtils
-    implementation 'com.github.afkT:DevUtils:1.4.3@aar'
+    implementation 'com.github.afkT:DevUtils:1.4.6@aar'
     // DevQuickUtils
-    implementation 'com.github.afkT:DevQuickUtils:1.0.6'
+    implementation 'com.github.afkT:DevQuickUtils:1.0.7'
 }

@@ -1,6 +1,6 @@
 package t.app.info.base.event;
 
-import dev.base.lib.DevBaseEvent;
+import dev.base.DevBaseEvent;
 
 /**
  * detail: 搜索App通知事件

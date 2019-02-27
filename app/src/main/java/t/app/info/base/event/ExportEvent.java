@@ -1,6 +1,6 @@
 package t.app.info.base.event;
 
-import dev.base.lib.DevBaseEvent;
+import dev.base.DevBaseEvent;
 
 /**
  * detail: 导出 信息/APK 通知事件

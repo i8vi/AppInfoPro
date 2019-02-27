@@ -1,7 +1,5 @@
 package t.app.info.base;
 
-import android.view.View;
-
 import butterknife.Unbinder;
 import dev.base.DevBaseFragment;
 import dev.lib.other.EventBusUtils;
@@ -11,7 +9,7 @@ import dev.utils.app.logger.DevLogger;
  * detail: Fragment 基类 -- 必须实现的方法和事件
  * Created by Ttt
  */
-public abstract class BaseFragment extends DevBaseFragment implements View.OnClickListener {
+public abstract class BaseFragment extends DevBaseFragment {
 
     // ==== 其他对象 ====
 
@@ -26,10 +24,6 @@ public abstract class BaseFragment extends DevBaseFragment implements View.OnCli
         if (unbinder != null){
             unbinder.unbind();
         }
-    }
-
-    @Override
-    public void onClick(View v) {
     }
 
     /** 滑动到顶部 */

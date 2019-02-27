@@ -1,6 +1,6 @@
 package t.app.info.base.event;
 
-import dev.base.lib.DevBaseEvent;
+import dev.base.DevBaseEvent;
 
 /**
  * detail: 文件操作相关事件
