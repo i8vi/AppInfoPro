@@ -74,17 +74,15 @@ public class MainActivity extends BaseActivity {
     SearchView searchView;
 
     @Override
+    public int getLayoutId() {
+        return R.layout.activity_main;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Toolbar
-        // https://blog.csdn.net/carlos1992/article/details/50707695
-        // https://www.cnblogs.com/mjsn/p/6150824.html
-        // 刷新Menu
-        // https://blog.csdn.net/luohaowang320/article/details/38556383
-        // 去掉阴影
-        // https://blog.csdn.net/dreamsever/article/details/52672739
+        // 初始化方法
+        initMethodOrder();
     }
 
     @Override
@@ -97,7 +95,7 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void initMethod() {
+    public void initMethodOrder() {
         // 初始化其他操作
         initOtherOperate();
         // 初始化事件
@@ -138,8 +136,17 @@ public class MainActivity extends BaseActivity {
     // ==
 
     @Override // 初始化其他操作
-    protected void initOtherOperate() {
+    public void initOtherOperate() {
         super.initOtherOperate();
+
+        // Toolbar
+        // https://blog.csdn.net/carlos1992/article/details/50707695
+        // https://www.cnblogs.com/mjsn/p/6150824.html
+        // 刷新Menu
+        // https://blog.csdn.net/luohaowang320/article/details/38556383
+        // 去掉阴影
+        // https://blog.csdn.net/dreamsever/article/details/52672739
+
         // 重置处理
         ProUtils.reset();
         // 销毁搜索线程资源
@@ -167,7 +174,7 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override // 初始化事件
-    protected void initListeners() {
+    public void initListeners() {
         super.initListeners();
         // 设置点击处理 = 双击Title
         am_toolbar.setOnClickListener(new View.OnClickListener() {

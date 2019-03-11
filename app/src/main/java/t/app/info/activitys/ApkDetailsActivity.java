@@ -25,7 +25,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import dev.lib.other.EventBusUtils;
 import dev.utils.app.AppUtils;
 import dev.utils.app.ClipboardUtils;
@@ -50,7 +49,7 @@ import t.app.info.utils.ProUtils;
  * detail: Apk 详情页面
  * Created by Ttt
  */
-public class ApkDetailsActivity extends BaseActivity implements View.OnClickListener {
+public class ApkDetailsActivity extends BaseActivity {
 
     // apk 信息 Item
     private ApkInfoItem apkInfoItem;
@@ -71,28 +70,15 @@ public class ApkDetailsActivity extends BaseActivity implements View.OnClickList
     TextView apd_delete_apk_tv;
 
     @Override
+    public int getLayoutId() {
+        return R.layout.activity_apk_details;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 设置View
-        setContentView(R.layout.activity_apk_details);
-        // 初始化View
-        ButterKnife.bind(this);
-        // 初始化上下文
-        mContext = this;
-        // 初始化操作
-        initOperate();
-        // 初始化事件
-        initListeners();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+        // 初始化方法
+        initMethodOrder();
     }
 
     @Override
@@ -151,8 +137,8 @@ public class ApkDetailsActivity extends BaseActivity implements View.OnClickList
 
     // ==
 
-    /** 初始化操作 */
-    private void initOperate() {
+    @Override // 初始化全部参数，配置等
+    public void initValues() {
         try {
             // 解析获取数据
             apkInfoItem = AppInfoUtils.getApkInfoItem(getIntent().getStringExtra(Constants.Key.KEY_APK_URI));
@@ -181,7 +167,7 @@ public class ApkDetailsActivity extends BaseActivity implements View.OnClickList
     }
 
     @Override // 初始化事件
-    protected void initListeners() {
+    public void initListeners() {
         super.initListeners();
         // 安装应用
         apd_install_apk_tv.setOnClickListener(this);

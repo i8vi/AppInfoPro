@@ -51,7 +51,7 @@ import t.app.info.utils.ProUtils;
  * detail: App 详情页面(已安装)
  * Created by Ttt
  */
-public class AppDetailsActivity extends BaseActivity implements View.OnClickListener {
+public class AppDetailsActivity extends BaseActivity {
 
     // app 信息 Item
     private AppInfoItem appInfoItem;
@@ -72,18 +72,17 @@ public class AppDetailsActivity extends BaseActivity implements View.OnClickList
     TextView aad_uninstall_tv;
 
     @Override
+    public int getLayoutId() {
+        return R.layout.activity_app_details;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 设置View
-        setContentView(R.layout.activity_app_details);
         // 初始化View
         ButterKnife.bind(this);
-        // 初始化上下文
-        mContext = this;
-        // 初始化操作
-        initOperate();
-        // 初始化事件
-        initListeners();
+        // 初始化方法
+        initMethodOrder();
     }
 
     @Override
@@ -102,11 +101,6 @@ public class AppDetailsActivity extends BaseActivity implements View.OnClickList
             }
         } catch (Exception e) {
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     @Override
@@ -134,8 +128,8 @@ public class AppDetailsActivity extends BaseActivity implements View.OnClickList
 
     // ==
 
-    /** 初始化操作 */
-    private void initOperate() {
+    @Override // 初始化全部参数，配置等
+    public void initValues() {
         try {
             // 解析获取数据
             appInfoItem = AppInfoUtils.getAppInfoItem(getIntent().getStringExtra(Constants.Key.KEY_PACKNAME));
@@ -164,7 +158,7 @@ public class AppDetailsActivity extends BaseActivity implements View.OnClickList
     }
 
     @Override // 初始化事件
-    protected void initListeners() {
+    public void initListeners() {
         super.initListeners();
         // 打开应用
         aad_openapp_tv.setOnClickListener(this);

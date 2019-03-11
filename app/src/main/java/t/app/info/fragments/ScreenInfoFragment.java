@@ -60,7 +60,7 @@ public class ScreenInfoFragment extends BaseFragment {
     // ==
 
     @Override
-    protected int getLayoutId() {
+    public int getLayoutId() {
         return R.layout.fragment_screen_info;
     }
 
@@ -71,15 +71,10 @@ public class ScreenInfoFragment extends BaseFragment {
         // 注册 EventBus
         registerEventOperate(true);
         // 初始化方法
-        initMethod();
+        initMethodOrder();
     }
 
     // ==
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
@@ -118,33 +113,6 @@ public class ScreenInfoFragment extends BaseFragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onClick(View v) {
-        super.onClick(v);
-        switch (v.getId()) {
-        }
-    }
-
-    @Override
-    public void initViews() {
-        super.initViews();
-    }
-
-    @Override
     public void initValues() {
         super.initValues();
         // 初始化适配器并绑定
@@ -152,16 +120,6 @@ public class ScreenInfoFragment extends BaseFragment {
         fsi_recycleview.setAdapter(mDeviceInfoAdapter);
         LinearLayoutManager manager = new LinearLayoutManager(mContext);
         fsi_recycleview.setLayoutManager(manager);
-    }
-
-    @Override
-    public void initListeners() {
-        super.initListeners();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     // ==

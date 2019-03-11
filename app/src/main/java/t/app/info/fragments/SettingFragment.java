@@ -57,7 +57,7 @@ public class SettingFragment extends BaseFragment {
     // ==
 
     @Override
-    protected int getLayoutId() {
+    public int getLayoutId() {
         return R.layout.fragment_setting;
     }
 
@@ -68,15 +68,10 @@ public class SettingFragment extends BaseFragment {
         // 注册 EventBus
         registerEventOperate(true);
         // 初始化方法
-        initMethod();
+        initMethodOrder();
     }
 
     // ==
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
@@ -104,33 +99,6 @@ public class SettingFragment extends BaseFragment {
         if(this.isHidden()) {
             return;
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onClick(View v) {
-        super.onClick(v);
-        switch (v.getId()) {
-        }
-    }
-
-    @Override
-    public void initViews() {
-        super.initViews();
     }
 
     @Override
@@ -176,11 +144,6 @@ public class SettingFragment extends BaseFragment {
                 ToastTintUtils.success(AppUtils.getString(R.string.reset_desetting_suc));
             }
         });
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
     }
 
     // ==

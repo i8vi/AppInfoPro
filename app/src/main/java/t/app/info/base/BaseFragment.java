@@ -20,7 +20,6 @@ public abstract class BaseFragment extends DevBaseFragment {
         super.onDestroy();
         // 注销 Event 事件
         registerEventOperate(false);
-
         if (unbinder != null){
             unbinder.unbind();
         }
